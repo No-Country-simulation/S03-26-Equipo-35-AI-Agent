@@ -1,0 +1,49 @@
+# ── Entornos virtuales ──
+.venv/
+venv/
+env/
+
+# ── Python ──
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ── Secretos y configuración local ──
+.env
+.env.local
+.env.production
+
+# ── Datos (Medallion Architecture) ──
+data/bronze/
+data/silver/
+data/gold/
+
+# ── ML artifacts ──
+mlruns/
+models/
+*.joblib
+*.pkl
+
+# ── IDEs ──
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+
+# ── Testing ──
+.coverage
+htmlcov/
+.pytest_cache/
+
+# ── Ruff ──
+.ruff_cache/

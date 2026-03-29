@@ -1,0 +1,815 @@
+nohup: no se tendrá en cuenta la entrada
+INFO:     Will watch for changes in these directories: ['/home/atlaros/GitHub/Autostory_builder']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [41651] using WatchFiles
+2026-03-28 19:35:34 [info     ] cors_configured                mode=development origins=*
+INFO:     Started server process [41658]
+INFO:     Waiting for application startup.
+2026-03-28 19:35:34 [info     ] autostory_startup              status=iniciando
+2026-03-28 19:35:34 [info     ] supabase_client_initialized    type=anon url=https://psonmrleppacsghsggvh.supabase.co
+2026-03-28 19:35:35 [info     ] autostory_startup              supabase=connected
+2026-03-28 19:35:35 [info     ] autostory_startup              status=listo
+INFO:     Application startup complete.
+2026-03-28 19:35:40 [info     ] http_request                   duration_ms=418.73 method=GET path=/stories/ status_code=200
+INFO:     127.0.0.1:45202 - "GET /stories/ HTTP/1.1" 200 OK
+2026-03-28 19:38:46 [info     ] auth_auto_assigned_org_id      org_id=dc6ac6fe-a093-4255-a916-e7b28222af54 user_id=dc6ac6fe-a093-4255-a916-e7b28222af54
+2026-03-28 19:38:46 [info     ] supabase_client_initialized    type=admin url=https://psonmrleppacsghsggvh.supabase.co
+INFO:     127.0.0.1:45740 - "GET /credits/balance HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 416, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/applications.py", line 1159, in __call__
+    await super().__call__(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/applications.py", line 90, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/base.py", line 191, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    raise exc
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/api/middleware.py", line 58, in log_requests
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/api/routers/credits.py", line 24, in get_balance
+    balance = await repo_get_balance(client, org_id.org_id if hasattr(org_id, "org_id") else org_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/db/repositories/credit_repository.py", line 30, in get_balance
+    result = client.rpc("get_credit_balance", {"p_org_id": org_id}).execute()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/postgrest/_sync/request_builder.py", line 82, in execute
+    raise APIError(dict(json_obj))
+postgrest.exceptions.APIError: {'message': 'Could not find the function public.get_credit_balance(p_org_id) in the schema cache', 'code': 'PGRST202', 'hint': None, 'details': 'Searched for the function public.get_credit_balance with parameter p_org_id or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache.'}
+2026-03-28 19:38:47 [info     ] http_request                   duration_ms=0.53 method=GET path=/stories status_code=307
+INFO:     127.0.0.1:45754 - "GET /stories?limit=3 HTTP/1.1" 307 Temporary Redirect
+2026-03-28 19:38:48 [info     ] auth_auto_assigned_org_id      org_id=dc6ac6fe-a093-4255-a916-e7b28222af54 user_id=dc6ac6fe-a093-4255-a916-e7b28222af54
+INFO:     127.0.0.1:45762 - "GET /credits/balance HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 416, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/applications.py", line 1159, in __call__
+    await super().__call__(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/applications.py", line 90, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/base.py", line 191, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    raise exc
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/api/middleware.py", line 58, in log_requests
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/api/routers/credits.py", line 24, in get_balance
+    balance = await repo_get_balance(client, org_id.org_id if hasattr(org_id, "org_id") else org_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/db/repositories/credit_repository.py", line 30, in get_balance
+    result = client.rpc("get_credit_balance", {"p_org_id": org_id}).execute()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/postgrest/_sync/request_builder.py", line 82, in execute
+    raise APIError(dict(json_obj))
+postgrest.exceptions.APIError: {'message': 'Could not find the function public.get_credit_balance(p_org_id) in the schema cache', 'code': 'PGRST202', 'hint': None, 'details': 'Searched for the function public.get_credit_balance with parameter p_org_id or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache.'}
+2026-03-28 19:38:52 [info     ] auth_auto_assigned_org_id      org_id=dc6ac6fe-a093-4255-a916-e7b28222af54 user_id=dc6ac6fe-a093-4255-a916-e7b28222af54
+2026-03-28 19:38:53 [info     ] http_request                   duration_ms=1027.18 method=GET path=/stories/ status_code=200
+INFO:     127.0.0.1:46978 - "GET /stories/?limit=10 HTTP/1.1" 200 OK
+2026-03-28 19:38:55 [info     ] auth_auto_assigned_org_id      org_id=dc6ac6fe-a093-4255-a916-e7b28222af54 user_id=dc6ac6fe-a093-4255-a916-e7b28222af54
+2026-03-28 19:38:55 [info     ] http_request                   duration_ms=573.61 method=GET path=/stories/ status_code=200
+INFO:     127.0.0.1:46980 - "GET /stories/?limit=50 HTTP/1.1" 200 OK
+2026-03-28 19:38:59 [info     ] auth_auto_assigned_org_id      org_id=dc6ac6fe-a093-4255-a916-e7b28222af54 user_id=dc6ac6fe-a093-4255-a916-e7b28222af54
+INFO:     127.0.0.1:46990 - "GET /credits/balance HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 416, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/applications.py", line 1159, in __call__
+    await super().__call__(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/applications.py", line 90, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/base.py", line 191, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    raise exc
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/api/middleware.py", line 58, in log_requests
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/api/routers/credits.py", line 24, in get_balance
+    balance = await repo_get_balance(client, org_id.org_id if hasattr(org_id, "org_id") else org_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/db/repositories/credit_repository.py", line 30, in get_balance
+    result = client.rpc("get_credit_balance", {"p_org_id": org_id}).execute()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/postgrest/_sync/request_builder.py", line 82, in execute
+    raise APIError(dict(json_obj))
+postgrest.exceptions.APIError: {'message': 'Could not find the function public.get_credit_balance(p_org_id) in the schema cache', 'code': 'PGRST202', 'hint': None, 'details': 'Searched for the function public.get_credit_balance with parameter p_org_id or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache.'}
+2026-03-28 19:39:00 [info     ] auth_auto_assigned_org_id      org_id=dc6ac6fe-a093-4255-a916-e7b28222af54 user_id=dc6ac6fe-a093-4255-a916-e7b28222af54
+2026-03-28 19:39:00 [info     ] http_request                   duration_ms=589.69 method=GET path=/credits/history status_code=200
+INFO:     127.0.0.1:47006 - "GET /credits/history?limit=5 HTTP/1.1" 200 OK
+2026-03-28 19:39:07 [info     ] auth_auto_assigned_org_id      org_id=dc6ac6fe-a093-4255-a916-e7b28222af54 user_id=dc6ac6fe-a093-4255-a916-e7b28222af54
+INFO:     127.0.0.1:43636 - "GET /credits/balance HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 416, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/applications.py", line 1159, in __call__
+    await super().__call__(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/applications.py", line 90, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/base.py", line 191, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    raise exc
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/api/middleware.py", line 58, in log_requests
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/api/routers/credits.py", line 24, in get_balance
+    balance = await repo_get_balance(client, org_id.org_id if hasattr(org_id, "org_id") else org_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/db/repositories/credit_repository.py", line 30, in get_balance
+    result = client.rpc("get_credit_balance", {"p_org_id": org_id}).execute()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/postgrest/_sync/request_builder.py", line 82, in execute
+    raise APIError(dict(json_obj))
+postgrest.exceptions.APIError: {'message': 'Could not find the function public.get_credit_balance(p_org_id) in the schema cache', 'code': 'PGRST202', 'hint': None, 'details': 'Searched for the function public.get_credit_balance with parameter p_org_id or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache.'}
+2026-03-28 19:39:07 [info     ] http_request                   duration_ms=0.37 method=GET path=/stories status_code=307
+INFO:     127.0.0.1:43638 - "GET /stories?limit=3 HTTP/1.1" 307 Temporary Redirect
+WARNING:  WatchFiles detected changes in 'core/credits/deductor.py', 'core/credits/__init__.py', 'api/routers/credits.py', 'core/credits/calculator.py', 'db/repositories/credit_repository.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-03-28 23:51:43 [info     ] autostory_shutdown             status=cerrado
+INFO:     Application shutdown complete.
+INFO:     Finished server process [41658]
+Process SpawnProcess-2:
+Traceback (most recent call last):
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
+    await self._serve(sockets)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
+    config.load()
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/config.py", line 441, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/atlaros/GitHub/Autostory_builder/api/main.py", line 17, in <module>
+    from api.routers import approvals, auth, credits, rag, stories
+  File "/home/atlaros/GitHub/Autostory_builder/api/routers/stories.py", line 19, in <module>
+    from core.credits.calculator import calculate_cost
+ModuleNotFoundError: No module named 'core.credits'
+WARNING:  WatchFiles detected changes in 'tests/unit/test_credit_deduction.py', 'tests/unit/test_credit_calculator.py'. Reloading...
+Process SpawnProcess-3:
+Traceback (most recent call last):
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
+    await self._serve(sockets)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
+    config.load()
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/config.py", line 441, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/atlaros/GitHub/Autostory_builder/api/main.py", line 17, in <module>
+    from api.routers import approvals, auth, credits, rag, stories
+  File "/home/atlaros/GitHub/Autostory_builder/api/routers/stories.py", line 19, in <module>
+    from core.credits.calculator import calculate_cost
+ModuleNotFoundError: No module named 'core.credits'
+WARNING:  WatchFiles detected changes in 'api/main.py'. Reloading...
+Process SpawnProcess-4:
+Traceback (most recent call last):
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
+    await self._serve(sockets)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
+    config.load()
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/config.py", line 441, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/atlaros/GitHub/Autostory_builder/api/main.py", line 17, in <module>
+    from api.routers import approvals, auth, rag, stories
+  File "/home/atlaros/GitHub/Autostory_builder/api/routers/stories.py", line 19, in <module>
+    from core.credits.calculator import calculate_cost
+ModuleNotFoundError: No module named 'core.credits'
+WARNING:  WatchFiles detected changes in 'frontend/app.py'. Reloading...
+Process SpawnProcess-5:
+Traceback (most recent call last):
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
+    await self._serve(sockets)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
+    config.load()
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/config.py", line 441, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/atlaros/GitHub/Autostory_builder/api/main.py", line 17, in <module>
+    from api.routers import approvals, auth, rag, stories
+  File "/home/atlaros/GitHub/Autostory_builder/api/routers/stories.py", line 19, in <module>
+    from core.credits.calculator import calculate_cost
+ModuleNotFoundError: No module named 'core.credits'
+WARNING:  WatchFiles detected changes in 'frontend/pages/5_configuracion.py'. Reloading...
+Process SpawnProcess-6:
+Traceback (most recent call last):
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
+    await self._serve(sockets)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
+    config.load()
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/config.py", line 441, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/atlaros/GitHub/Autostory_builder/api/main.py", line 17, in <module>
+    from api.routers import approvals, auth, rag, stories
+  File "/home/atlaros/GitHub/Autostory_builder/api/routers/stories.py", line 19, in <module>
+    from core.credits.calculator import calculate_cost
+ModuleNotFoundError: No module named 'core.credits'
+WARNING:  WatchFiles detected changes in 'frontend/pages/5_configuracion.py'. Reloading...
+Process SpawnProcess-7:
+Traceback (most recent call last):
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
+    await self._serve(sockets)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
+    config.load()
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/config.py", line 441, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/atlaros/GitHub/Autostory_builder/api/main.py", line 17, in <module>
+    from api.routers import approvals, auth, rag, stories
+  File "/home/atlaros/GitHub/Autostory_builder/api/routers/stories.py", line 19, in <module>
+    from core.credits.calculator import calculate_cost
+ModuleNotFoundError: No module named 'core.credits'
+WARNING:  WatchFiles detected changes in 'frontend/pages/5_configuracion.py'. Reloading...
+Process SpawnProcess-8:
+Traceback (most recent call last):
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
+    await self._serve(sockets)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
+    config.load()
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/config.py", line 441, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/importer.py", line 22, in import_from_string
+    raise exc from None
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/atlaros/GitHub/Autostory_builder/api/main.py", line 17, in <module>
+    from api.routers import approvals, auth, rag, stories
+  File "/home/atlaros/GitHub/Autostory_builder/api/routers/stories.py", line 19, in <module>
+    from core.credits.calculator import calculate_cost
+ModuleNotFoundError: No module named 'core.credits'
+WARNING:  WatchFiles detected changes in 'api/routers/stories.py'. Reloading...
+2026-03-28 23:53:47 [info     ] cors_configured                mode=development origins=*
+INFO:     Started server process [58179]
+INFO:     Waiting for application startup.
+2026-03-28 23:53:47 [info     ] autostory_startup              status=iniciando
+2026-03-28 23:53:47 [info     ] supabase_client_initialized    type=anon url=https://psonmrleppacsghsggvh.supabase.co
+2026-03-28 23:53:49 [info     ] autostory_startup              supabase=connected
+2026-03-28 23:53:49 [info     ] autostory_startup              status=listo
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/unit/test_rls_isolation.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-03-28 23:54:05 [info     ] autostory_shutdown             status=cerrado
+INFO:     Application shutdown complete.
+INFO:     Finished server process [58179]
+2026-03-28 23:54:09 [info     ] cors_configured                mode=development origins=*
+INFO:     Started server process [58228]
+INFO:     Waiting for application startup.
+2026-03-28 23:54:09 [info     ] autostory_startup              status=iniciando
+2026-03-28 23:54:09 [info     ] supabase_client_initialized    type=anon url=https://psonmrleppacsghsggvh.supabase.co
+2026-03-28 23:54:09 [info     ] autostory_startup              supabase=connected
+2026-03-28 23:54:09 [info     ] autostory_startup              status=listo
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'core/multimedia/storage.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-03-28 23:54:44 [info     ] autostory_shutdown             status=cerrado
+INFO:     Application shutdown complete.
+INFO:     Finished server process [58228]
+2026-03-28 23:54:48 [info     ] cors_configured                mode=development origins=*
+INFO:     Started server process [58391]
+INFO:     Waiting for application startup.
+2026-03-28 23:54:48 [info     ] autostory_startup              status=iniciando
+2026-03-28 23:54:48 [info     ] supabase_client_initialized    type=anon url=https://psonmrleppacsghsggvh.supabase.co
+2026-03-28 23:54:49 [info     ] autostory_startup              supabase=connected
+2026-03-28 23:54:49 [info     ] autostory_startup              status=listo
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'frontend/api_client.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-03-28 23:55:10 [info     ] autostory_shutdown             status=cerrado
+INFO:     Application shutdown complete.
+INFO:     Finished server process [58391]
+2026-03-28 23:55:13 [info     ] cors_configured                mode=development origins=*
+INFO:     Started server process [58456]
+INFO:     Waiting for application startup.
+2026-03-28 23:55:13 [info     ] autostory_startup              status=iniciando
+2026-03-28 23:55:13 [info     ] supabase_client_initialized    type=anon url=https://psonmrleppacsghsggvh.supabase.co
+2026-03-28 23:55:14 [info     ] autostory_startup              supabase=connected
+2026-03-28 23:55:14 [info     ] autostory_startup              status=listo
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'frontend/pages/2_nueva_historia.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-03-28 23:55:28 [info     ] autostory_shutdown             status=cerrado
+INFO:     Application shutdown complete.
+INFO:     Finished server process [58456]
+2026-03-28 23:55:32 [info     ] cors_configured                mode=development origins=*
+INFO:     Started server process [58502]
+INFO:     Waiting for application startup.
+2026-03-28 23:55:32 [info     ] autostory_startup              status=iniciando
+2026-03-28 23:55:32 [info     ] supabase_client_initialized    type=anon url=https://psonmrleppacsghsggvh.supabase.co
+2026-03-28 23:55:32 [info     ] autostory_startup              supabase=connected
+2026-03-28 23:55:32 [info     ] autostory_startup              status=listo
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'api/routers/stories.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-03-28 23:55:54 [info     ] autostory_shutdown             status=cerrado
+INFO:     Application shutdown complete.
+INFO:     Finished server process [58502]
+Process SpawnProcess-14:
+Traceback (most recent call last):
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 75, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/_compat.py", line 30, in asyncio_run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 79, in serve
+    await self._serve(sockets)
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 86, in _serve
+    config.load()
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/config.py", line 441, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/GitHub/Autostory_builder/.venv/lib/python3.11/site-packages/uvicorn/importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/atlaros/.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/atlaros/GitHub/Autostory_builder/api/main.py", line 17, in <module>
+    from api.routers import approvals, auth, rag, stories
+  File "/home/atlaros/GitHub/Autostory_builder/api/routers/stories.py", line 23, in <module>
+    logger = structlog.get_logger()
+             ^^^^^^^^^
+NameError: name 'structlog' is not defined
+WARNING:  WatchFiles detected changes in 'api/routers/stories.py'. Reloading...
+2026-03-28 23:56:13 [info     ] cors_configured                mode=development origins=*
+INFO:     Started server process [58587]
+INFO:     Waiting for application startup.
+2026-03-28 23:56:13 [info     ] autostory_startup              status=iniciando
+2026-03-28 23:56:13 [info     ] supabase_client_initialized    type=anon url=https://psonmrleppacsghsggvh.supabase.co
+2026-03-28 23:56:14 [info     ] autostory_startup              supabase=connected
+2026-03-28 23:56:14 [info     ] autostory_startup              status=listo
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'core/llm/providers/gemini_provider.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-03-28 23:56:44 [info     ] autostory_shutdown             status=cerrado
+INFO:     Application shutdown complete.
+INFO:     Finished server process [58587]
+2026-03-28 23:56:48 [info     ] cors_configured                mode=development origins=*
+INFO:     Started server process [58690]
+INFO:     Waiting for application startup.
+2026-03-28 23:56:48 [info     ] autostory_startup              status=iniciando
+2026-03-28 23:56:48 [info     ] supabase_client_initialized    type=anon url=https://psonmrleppacsghsggvh.supabase.co
+2026-03-28 23:56:48 [info     ] autostory_startup              supabase=connected
+2026-03-28 23:56:48 [info     ] autostory_startup              status=listo
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'core/llm/router.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-03-28 23:56:57 [info     ] autostory_shutdown             status=cerrado
+INFO:     Application shutdown complete.
+INFO:     Finished server process [58690]
+2026-03-28 23:57:01 [info     ] cors_configured                mode=development origins=*
+INFO:     Started server process [58715]
+INFO:     Waiting for application startup.
+2026-03-28 23:57:01 [info     ] autostory_startup              status=iniciando
+2026-03-28 23:57:01 [info     ] supabase_client_initialized    type=anon url=https://psonmrleppacsghsggvh.supabase.co
+2026-03-28 23:57:02 [info     ] autostory_startup              supabase=connected
+2026-03-28 23:57:02 [info     ] autostory_startup              status=listo
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'core/llm/prompt_builder.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-03-28 23:57:21 [info     ] autostory_shutdown             status=cerrado
+INFO:     Application shutdown complete.
+INFO:     Finished server process [58715]
+2026-03-28 23:57:25 [info     ] cors_configured                mode=development origins=*
+INFO:     Started server process [58795]
+INFO:     Waiting for application startup.
+2026-03-28 23:57:25 [info     ] autostory_startup              status=iniciando
+2026-03-28 23:57:25 [info     ] supabase_client_initialized    type=anon url=https://psonmrleppacsghsggvh.supabase.co
+2026-03-28 23:57:26 [info     ] autostory_startup              supabase=connected
+2026-03-28 23:57:26 [info     ] autostory_startup              status=listo
+INFO:     Application startup complete.
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-03-28 23:59:17 [info     ] autostory_shutdown             status=cerrado
+INFO:     Application shutdown complete.
+INFO:     Finished server process [58795]
+INFO:     Stopping reloader process [41651]
