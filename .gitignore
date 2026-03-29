@@ -47,8 +47,3 @@ htmlcov/
 
 # ── Ruff ──
 .ruff_cache/
-
-*.log
-uvicorn.log
-.env.local
-.env.*.local
