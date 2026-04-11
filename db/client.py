@@ -51,7 +51,7 @@ def get_client() -> Client:
         raise ValueError(msg)
 
     _client = create_client(url, key)
-    logger.info("supabase_client_initialized", type="anon", url=url[:40])
+    logger.info("supabase_client_initialized", type="anon")
     return _client
 
 
@@ -84,7 +84,7 @@ def get_admin_client() -> Client:
         raise ValueError(msg)
 
     _admin_client = create_client(url, service_key)
-    logger.info("supabase_client_initialized", type="admin", url=url[:40])
+    logger.info("supabase_client_initialized", type="admin")
     return _admin_client
 
 
