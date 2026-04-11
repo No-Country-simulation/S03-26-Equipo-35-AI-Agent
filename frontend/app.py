@@ -3,7 +3,6 @@
 Maneja el inicio de sesión y muestra un dashboard básico en el home con diseño UI refinado.
 """
 
-import os
 import streamlit as st
 from api_client import fetch_api, login_with_supabase
 from components.styles import inject_global_styles, render_status_badge
@@ -51,8 +50,6 @@ def show_login():
                     st.rerun()
             except Exception as e:
                 st.error(f"Error de autenticación: {e}")
-
-    st.markdown('<hr style="margin: 20px 0; border: 0; border-top: 1px solid rgba(0,0,0,0.1);">', unsafe_allow_html=True)
 
 
 def show_dashboard():
