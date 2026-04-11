@@ -230,6 +230,28 @@ async def ingest_file(
 
     org_id = current_user.org_id
 
+    MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
+    ALLOWED_TYPES = {
+        "application/pdf", 
+        "text/plain", 
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    }
+
+    if file.content_type not in ALLOWED_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Tipo de archivo no permitido"
+        )
+
+    file.file.seek(0, 2)
+    size = file.file.tell()
+    if size > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, 
+            detail="Archivo muy grande (máximo 50MB)"
+        )
+    file.file.seek(0)
+
     try:
         file_bytes = await file.read()
         text = await extract_text_from_file(

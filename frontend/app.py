@@ -3,6 +3,7 @@
 Maneja el inicio de sesión y muestra un dashboard básico en el home con diseño UI refinado.
 """
 
+import os
 import streamlit as st
 from api_client import fetch_api, login_with_supabase
 from components.styles import inject_global_styles, render_status_badge
@@ -42,14 +43,9 @@ def show_login():
 
             try:
                 with st.spinner("Autenticando..."):
-                    # Si es el usuario DEMO, inyectamos el JWT de nuestro fixture / token de pruebas
-                    if email == "demo@autostory.builder":
-                        st.session_state["token"] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.demo-token-123"
-                        st.session_state["user"] = {"email": "demo@autostory.builder"}
-                    else:
-                        session_data = login_with_supabase(email, password)
-                        st.session_state["token"] = session_data["access_token"]
-                        st.session_state["user"] = session_data["user"]
+                    session_data = login_with_supabase(email, password)
+                    st.session_state["token"] = session_data["access_token"]
+                    st.session_state["user"] = session_data["user"]
 
                     st.success("¡Sesión iniciada correctamente!")
                     st.rerun()
@@ -57,14 +53,6 @@ def show_login():
                 st.error(f"Error de autenticación: {e}")
 
     st.markdown('<hr style="margin: 20px 0; border: 0; border-top: 1px solid rgba(0,0,0,0.1);">', unsafe_allow_html=True)
-
-    # Demo autologin para exhibición (Portafolio)
-    st.markdown("### Acceso Rápido / Portfolio")
-    st.info("Para evitar fricción en demostraciones, utiliza este botón para ingresar con la cuenta de exhibición precargada.")
-    if st.button("🚀 Ingresar a la Demo Corporativa", type="primary", use_container_width=True):
-        st.session_state["token"] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.demo-token-123"
-        st.session_state["user"] = {"email": "evaluador@autostory.builder"}
-        st.rerun()
 
 
 def show_dashboard():

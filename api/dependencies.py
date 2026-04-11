@@ -12,6 +12,7 @@ SEGURIDAD CRÍTICA:
 
 from typing import Annotated
 
+import os
 import structlog
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -48,15 +49,6 @@ async def get_current_org(
     token = credentials.credentials
 
     try:
-        # Bypass instantáneo para el Demo Mode del Portfolio
-        if token == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.demo-token-123":
-            return CurrentUser(
-                user_id="00000000-0000-0000-0000-000000000777",
-                org_id="00000000-0000-0000-0000-000000000999",
-                role="admin",
-                email="evaluador@autostory.builder",
-            )
-
         client = get_client()
         response = client.auth.get_user(token)
         user = response.user
