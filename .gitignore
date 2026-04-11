@@ -49,3 +49,8 @@ htmlcov/
 .ruff_cache/
 
 *.log
+
+# ── Agente AI / IDE (Antigravity) ──
+GEMINI.md
+AGENTS.md
+.agents/

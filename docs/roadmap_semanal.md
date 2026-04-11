@@ -159,7 +159,7 @@ Semana 6 ⏳ PENDIENTE — Deploy a producción + clientes piloto
 | Coverage 100% en `core/credits/` y `state_machine.py` | ⏳ | |
 | 3 historias de demostración generadas | ⏳ | Tono inspiracional, educativo, técnico |
 | Índice de satisfacción de output ≥ 4/5 | ⏳ | Medido con equipo interno |
-| Security review manual completo | ⏳ | Usar Skill `security-review` |
+| Security review manual completo | ✅ | Auditoría Copilot resuelta: token demo eliminado, logs sanitizados, validación uploads |
 
 **Hito de la semana:** Suite de tests completa verde + 3 historias de demo listas.
 
