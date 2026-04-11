@@ -1,5 +1,5 @@
 # AutoStory Builder — Dependencies
-# Generado desde pyproject.toml — sincronizar con `uv pip compile pyproject.toml`
+# Sincronizado con pyproject.toml — fuente de verdad: pyproject.toml
 
 # === Core ===
 fastapi>=0.115.0
@@ -20,6 +20,17 @@ structlog>=24.4.0
 python-multipart>=0.0.18
 trafilatura>=2.0.0
 playwright>=1.48.0
+
+# === Agentic AI ===
+langgraph>=0.2.0
+langchain-core>=0.3.0
+langchain-groq>=0.2.0
+langsmith>=0.1.0
+
+# === Extractores multimedia ===
+youtube-transcript-api>=1.0.0
+python-docx>=1.0.0
+pypdf>=4.0.0
 
 # === Dev ===
 pytest>=8.3.0

@@ -14,10 +14,18 @@ CREATE TABLE IF NOT EXISTS documents (
     source_url  TEXT,
     title       TEXT NOT NULL,
     raw_content TEXT NOT NULL,
-    doc_type    TEXT NOT NULL DEFAULT 'web' CHECK (doc_type IN ('web', 'pdf', 'text', 'image')),
+    doc_type    TEXT NOT NULL DEFAULT 'web' CHECK (doc_type IN ('web', 'pdf', 'text', 'image', 'file', 'youtube', 'docx')),
     metadata    JSONB DEFAULT '{}',
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- ── PATCH para bases existentes: actualizar el CHECK constraint ──
+-- Ejecutar en Supabase SQL Editor si la tabla ya existe:
+--
+-- ALTER TABLE documents DROP CONSTRAINT IF EXISTS documents_doc_type_check;
+-- ALTER TABLE documents ADD CONSTRAINT documents_doc_type_check
+--     CHECK (doc_type IN ('web', 'pdf', 'text', 'image', 'file', 'youtube', 'docx'));
+
 
 CREATE INDEX IF NOT EXISTS idx_documents_org_id ON documents (org_id);
 

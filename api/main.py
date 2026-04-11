@@ -14,7 +14,7 @@ import structlog
 from fastapi import FastAPI
 
 from api.middleware import setup_middleware
-from api.routers import approvals, auth, rag, stories
+from api.routers import approvals, rag, stories
 from api.schemas import HealthResponse
 from db.client import check_connection
 
@@ -68,7 +68,7 @@ def create_app() -> FastAPI:
     setup_middleware(app)
 
     # Routers por dominio
-    app.include_router(auth.router, prefix="/auth", tags=["auth"])
+
     app.include_router(stories.router, prefix="/stories", tags=["stories"])
     app.include_router(rag.router, prefix="/rag", tags=["rag"])
     app.include_router(approvals.router, prefix="/approvals", tags=["approvals"])

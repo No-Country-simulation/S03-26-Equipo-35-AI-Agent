@@ -34,12 +34,12 @@ class TestRLSIsolation:
             if call[0][0] == "org_id":
                 assert call[0][1] != org_b["id"], "¡Peligro! Filtro de Org B detectado."
 
-    @patch("core.rag.retriever.get_client")
+    @patch("core.rag.retriever.get_admin_client")
     @patch("core.rag.retriever.embed_query")
     async def test_org_a_cannot_see_org_b_embeddings(
         self,
         mock_embed_query,
-        mock_get_client,
+        mock_get_admin_client,
         org_a: dict[str, str],
         org_b: dict[str, str],
         db_test,
@@ -48,7 +48,7 @@ class TestRLSIsolation:
         from core.rag.retriever import retrieve_context
 
         # Arrange
-        mock_get_client.return_value = db_test
+        mock_get_admin_client.return_value = db_test
         db_test.rpc.return_value.execute.return_value.data = []
         mock_embed_query.return_value = [0.1] * 1024
 

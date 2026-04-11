@@ -5,7 +5,6 @@ reglas con state_machine y persistiendo los cambios en DB.
 """
 
 from core.approvals.state_machine import transition
-from db.client import get_client
 from db.repositories.approval_repository import record_transition
 from db.repositories.story_repository import get_story_by_id, update_story_status
 
@@ -25,7 +24,8 @@ async def execute_transition(
     3. Actualiza estado.
     4. Registra en historial.
     """
-    client = get_client()
+    from db.client import get_admin_client
+    client = get_admin_client()
 
     story = await get_story_by_id(client, story_id, org_id)
     if not story:

@@ -8,9 +8,8 @@ import uuid
 from typing import Any
 
 import structlog
-from fastapi import UploadFile
 
-from db.client import get_client
+from db.client import get_admin_client
 
 logger = structlog.get_logger()
 BUCKET_NAME = "multimedia_assets"
@@ -38,7 +37,7 @@ async def upload_file(
     Raises:
         ValueError: Si falla la subida a Supabase.
     """
-    client = get_client()
+    client = get_admin_client()
 
     # Generar un nombre único: org_id/uuid_filename
     unique_id = str(uuid.uuid4())

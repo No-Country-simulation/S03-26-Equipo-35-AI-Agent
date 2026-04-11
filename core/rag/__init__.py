@@ -40,3 +40,18 @@ class RAGContext:
     chunks: list[Chunk] = field(default_factory=list)
     org_id: str = ""
     total_results: int = 0
+
+
+@dataclass
+class IngestResult:
+    """Resultado de una operación de ingestión RAG.
+
+    Retornado por las funciones de core/rag/ingestor.py después de
+    completar el pipeline scrape → chunk → embed → store.
+    """
+
+    document_id: str
+    chunks_count: int
+    doc_type: str
+    title: str
+    metadata: dict[str, str] = field(default_factory=dict)

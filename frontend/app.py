@@ -26,7 +26,7 @@ def show_login():
             [data-testid="collapsedControl"] { display: none !important; }
         </style>
     """, unsafe_allow_html=True)
-    
+
     st.markdown('<p class="as-logo" style="margin-bottom: 5px;">Auto<span>Story</span> Builder</p>', unsafe_allow_html=True)
     st.markdown('<p style="color: #666; font-size: 15px;">Narrativas que suenan a tu empresa</p>', unsafe_allow_html=True)
 

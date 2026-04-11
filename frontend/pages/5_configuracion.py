@@ -1,6 +1,5 @@
 """Página de configuración de la cuenta y créditos."""
 import streamlit as st
-from api_client import fetch_api
 from components.styles import inject_global_styles, render_page_header
 
 st.set_page_config(page_title="Configuración", page_icon="⚙️", layout="wide")

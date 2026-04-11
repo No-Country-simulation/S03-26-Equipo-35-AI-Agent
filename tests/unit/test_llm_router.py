@@ -57,11 +57,10 @@ class TestPromptBuilder:
         _, user_prompt = build_story_prompt(
             context=context,
             task="Escribe un comunicado",
-            brand_tone="formal",
         )
 
         assert "## Tarea" in user_prompt
-        assert "## Tono de Marca" in user_prompt
+        assert "### Tono" in user_prompt
         assert "## Restricciones" in user_prompt
         assert "## Contexto de Marca" in user_prompt
 

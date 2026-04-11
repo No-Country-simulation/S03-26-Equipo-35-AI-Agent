@@ -66,7 +66,7 @@ async def get_history_for_story(
     """
     result = (
         client.table("approval_history")
-        .select("*")
+        .select("id, story_id, org_id, from_status, to_status, changed_by, comment, created_at")
         .eq("org_id", org_id)
         .eq("story_id", story_id)
         .order("created_at", desc=False)

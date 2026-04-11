@@ -62,7 +62,7 @@ async def get_stories_by_org(
     """
     result = (
         client.table("stories")
-        .select("*")
+        .select("id, title, content, story_type, status, credits_used, llm_provider, created_by, prompt_used, created_at")
         .eq("org_id", org_id)
         .order("created_at", desc=True)
         .range(offset, offset + limit - 1)
@@ -91,7 +91,7 @@ async def get_story_by_id(
     """
     result = (
         client.table("stories")
-        .select("*")
+        .select("id, title, content, story_type, status, credits_used, llm_provider, created_by, prompt_used, metadata, created_at")
         .eq("org_id", org_id)
         .eq("id", story_id)
         .single()

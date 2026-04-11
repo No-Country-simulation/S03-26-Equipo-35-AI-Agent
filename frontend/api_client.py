@@ -70,7 +70,7 @@ def fetch_api(
 
     url = f"{API_BASE_URL}{endpoint}"
 
-    with httpx.Client(timeout=180.0) as client:
+    with httpx.Client(timeout=600.0) as client:
         try:
             if method == "GET":
                 response = client.get(url, headers=headers, params=params)
@@ -80,6 +80,8 @@ def fetch_api(
                     response = client.post(url, headers=headers, data=data, files=files, params=params)
                 else:
                     response = client.post(url, headers=headers, json=json, params=params)
+            elif method == "DELETE":
+                response = client.delete(url, headers=headers, params=params)
             else:
                 raise ValueError(f"Método HTTP no soportado: {method}")
 

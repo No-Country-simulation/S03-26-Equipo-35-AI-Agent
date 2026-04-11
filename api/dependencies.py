@@ -80,7 +80,7 @@ async def get_current_org(
         if not org_id:
             org_id = user.id
             logger.info("auth_auto_assigned_org_id", user_id=user.id, org_id=org_id)
-            
+
             # Asegurar que la organización existe para evitar errores de Foreign Key (FK)
             try:
                 admin_client = get_admin_client()
