@@ -78,7 +78,7 @@ def show_dashboard():
 
     with col2:
         if st.button("◈ Base de marca \n\nSincroniza el contexto RAG de tu empresa", use_container_width=True, type="primary"):
-            st.switch_page("pages/1_onboarding.py")
+            st.switch_page("pages/1_base_de_marca.py")
 
         if st.button("≡ Mis historias \n\nHistorial y versiones anteriores", use_container_width=True, type="primary"):
             st.switch_page("pages/3_mis_historias.py")

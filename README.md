@@ -231,7 +231,7 @@ autostory-builder/
 │   ├── app.py                ← Entry point + login + dashboard
 │   ├── api_client.py         ← httpx → FastAPI
 │   ├── pages/                ← 5 páginas del MVP
-│   │   ├── 1_onboarding.py   ← Ingestión RAG (URL, PDF, YouTube, audio)
+│   │   ├── 1_base_de_marca.py← Ingestión RAG (URL, PDF, YouTube, audio)
 │   │   ├── 2_nueva_historia.py← Generación de contenido
 │   │   ├── 3_mis_historias.py ← Historial + editor in-line + moldes ⭐
 │   │   ├── 4_aprobaciones.py  ← Circuito de aprobación por roles
