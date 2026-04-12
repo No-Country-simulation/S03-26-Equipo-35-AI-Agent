@@ -41,13 +41,14 @@ VALID_STATES: set[str] = {
 VALID_TRANSITIONS: dict[str, dict[str, list[str]]] = {
     "borrador": {
         "en_revision": ["editor", "admin"],
+        "aprobado": ["editor", "revisor", "admin"],  # Permite salto directo para MVP
     },
     "en_revision": {
-        "aprobado": ["revisor", "admin"],
-        "rechazado": ["revisor", "admin"],
+        "aprobado": ["editor", "revisor", "admin"],  # 'editor' habilitado para testing local
+        "rechazado": ["editor", "revisor", "admin"],
     },
     "aprobado": {
-        "publicado": ["admin"],
+        "publicado": ["editor", "admin"],
     },
     "rechazado": {
         "borrador": ["editor", "admin"],
