@@ -24,8 +24,10 @@ from langgraph.graph import END, START, StateGraph
 from core.agents.nodes import (
     node_analyze_context,
     node_finalize,
+    node_hook_agent,
     node_qa_editor,
     node_retrieve_rag,
+    node_seo_agent,
     node_write_content,
 )
 from core.agents.state import ContentGenerationState
@@ -72,6 +74,8 @@ def build_generation_graph() -> StateGraph:
     graph.add_node("retrieve_rag", node_retrieve_rag)
     graph.add_node("analyze_context", node_analyze_context)
     graph.add_node("write_content", node_write_content)
+    graph.add_node("hook_agent", node_hook_agent)
+    graph.add_node("seo_agent", node_seo_agent)
     graph.add_node("qa_editor", node_qa_editor)
     graph.add_node("finalize", node_finalize)
 
@@ -79,7 +83,11 @@ def build_generation_graph() -> StateGraph:
     graph.add_edge(START, "retrieve_rag")
     graph.add_edge("retrieve_rag", "analyze_context")
     graph.add_edge("analyze_context", "write_content")
-    graph.add_edge("write_content", "qa_editor")
+    
+    # Fase 3: Pipeline Secuencial de Especialistas
+    graph.add_edge("write_content", "hook_agent")
+    graph.add_edge("hook_agent", "seo_agent")
+    graph.add_edge("seo_agent", "qa_editor")
 
     # ── Arista condicional: QA decide si reintentar o finalizar ──
     graph.add_conditional_edges(
@@ -131,7 +139,10 @@ async def run_generation_graph(input_data: dict[str, Any]) -> ContentGenerationS
         "rag_chunks": [],
         "brand_insights": "",
         "visual_context": "",
+        "few_shot_examples": [],
         "draft_content": "",
+        "hook_feedback": "",
+        "seo_feedback": "",
         "qa_feedback": "",
         "qa_approved": False,
         "retry_count": 0,

@@ -224,9 +224,34 @@ async def node_analyze_context(state: ContentGenerationState) -> dict[str, Any]:
             org_id=state["org_id"],
         )
 
+        # ── Cargar ejemplos dorados (Few-Shot) ──
+        few_shot_examples: list[str] = []
+        try:
+            from db.client import get_admin_client
+            from db.repositories import golden_example_repository as golden_repo
+
+            admin_client = get_admin_client()
+            golden_docs = await golden_repo.get_examples(
+                client=admin_client,
+                org_id=state["org_id"],
+                story_type=state["story_type"],
+                tone=state.get("tone", "profesional"),
+            )
+            few_shot_examples = [doc["content"] for doc in golden_docs if doc.get("content")]
+            if few_shot_examples:
+                logger.info(
+                    "few_shot_loaded",
+                    count=len(few_shot_examples),
+                    story_type=state["story_type"],
+                    tone=state.get("tone", "profesional"),
+                )
+        except Exception as fs_err:
+            logger.warning("few_shot_load_failed", error=str(fs_err)[:100])
+
         return {
             "brand_insights": response.content,
             "visual_context": visual_context,
+            "few_shot_examples": few_shot_examples,
         }
 
     except Exception as e:
@@ -238,6 +263,7 @@ async def node_analyze_context(state: ContentGenerationState) -> dict[str, Any]:
         return {
             "brand_insights": f"## Brief de Marca\n\n{chunks_text}",
             "visual_context": "",
+            "few_shot_examples": [],
         }
 
 
@@ -288,6 +314,22 @@ async def node_write_content(state: ContentGenerationState) -> dict[str, Any]:
                 f"Integra estos datos de forma natural en la narrativa:\n{state['analytics_data']}"
             )
 
+        # Sección de Few-Shot (Ejemplos Dorados)
+        few_shot_section = ""
+        few_shot_examples = state.get("few_shot_examples", [])
+        if few_shot_examples:
+            examples_text = "\n\n---\n\n".join(
+                f"### Ejemplo {i+1}\n\n{ex}" for i, ex in enumerate(few_shot_examples)
+            )
+            few_shot_section = (
+                f"\n\n## === EJEMPLOS DE ESTILO IDEAL ===\n\n"
+                f"Analizá el ritmo, tono y estructura de estos ejemplos reales. "
+                f"Tu texto DEBE imitar este nivel de calidad, cadencia y formato. "
+                f"NO copies el contenido, solo el estilo.\n\n"
+                f"{examples_text}\n\n"
+                f"## === FIN DE EJEMPLOS ===\n"
+            )
+
         user_prompt = (
             f"## Tarea\n\n{state['task']}\n\n"
             f"## Tipo de Contenido\n\n{story_type}\n\n"
@@ -296,6 +338,7 @@ async def node_write_content(state: ContentGenerationState) -> dict[str, Any]:
             f"**Tono:** {tone_instr}\n\n"
             f"**Audiencia:** {audience_instr}\n\n"
             f"**Longitud:** {length_instr}"
+            f"{few_shot_section}"
             f"{analytics_section}"
             f"{retry_section}"
         )
@@ -337,6 +380,97 @@ async def node_write_content(state: ContentGenerationState) -> dict[str, Any]:
     except Exception as e:
         logger.error("node_write_content_failed", error=str(e)[:200], org_id=state["org_id"])
         return {"error": f"Writer failed: {e!s}", "status": "error", "draft_content": ""}
+
+
+# ── Nodo: Agente de Enganche (Hook Agent) ──
+
+async def node_hook_agent(state: ContentGenerationState) -> dict[str, Any]:
+    """Evalúa la calidad narrativa de las primeras 2 líneas (el gancho).
+    
+    Agente: Groq Llama 3.3 70B (rápido y analítico).
+    """
+    try:
+        draft = state.get("draft_content", "")
+        if not draft:
+            return {"hook_feedback": ""}
+
+        from core.llm.providers import groq_provider
+        
+        system_prompt = _load_agent_prompt("hook_agent")
+        
+        # Extraer primeras 3 líneas para no distraer al agente
+        lines = [line.strip() for line in draft.split("\n") if line.strip()]
+        first_lines = "\n".join(lines[:3])
+
+        user_prompt = (
+            f"## Tipo de Contenido\n{state['story_type']}\n\n"
+            f"## Hook a evaluar\n\n{first_lines}"
+        )
+
+        start = time.perf_counter()
+        response = await groq_provider.generate(
+            prompt=user_prompt,
+            system_prompt=system_prompt,
+            temperature=0.3,
+        )
+        latency = (time.perf_counter() - start) * 1000
+
+        result = response.content.strip()
+        logger.info(
+            "node_hook_agent_done",
+            latency_ms=round(latency, 2),
+            org_id=state["org_id"]
+        )
+
+        return {"hook_feedback": result}
+
+    except Exception as e:
+        logger.error("node_hook_agent_failed", error=str(e)[:200], org_id=state["org_id"])
+        # No bloquear el flujo si el experto en hooks falla
+        return {"hook_feedback": ""}
+
+
+# ── Nodo: Agente SEO y Algoritmos ──
+
+async def node_seo_agent(state: ContentGenerationState) -> dict[str, Any]:
+    """Evalúa la optimización del contenido para algoritmos orgánicos.
+    
+    Agente: Groq Llama 3.3 70B.
+    """
+    try:
+        draft = state.get("draft_content", "")
+        if not draft:
+            return {"seo_feedback": ""}
+
+        from core.llm.providers import groq_provider
+        
+        system_prompt = _load_agent_prompt("seo_agent")
+        
+        user_prompt = (
+            f"## Plataforma Destino\n{state['story_type']}\n\n"
+            f"## Borrador a evaluar\n\n{draft}"
+        )
+
+        start = time.perf_counter()
+        response = await groq_provider.generate(
+            prompt=user_prompt,
+            system_prompt=system_prompt,
+            temperature=0.3,
+        )
+        latency = (time.perf_counter() - start) * 1000
+
+        result = response.content.strip()
+        logger.info(
+            "node_seo_agent_done",
+            latency_ms=round(latency, 2),
+            org_id=state["org_id"]
+        )
+
+        return {"seo_feedback": result}
+
+    except Exception as e:
+        logger.error("node_seo_agent_failed", error=str(e)[:200], org_id=state["org_id"])
+        return {"seo_feedback": ""}
 
 
 # ── Nodo 4: Agente Editor QA (Groq — modelo ligero) ──
@@ -384,6 +518,10 @@ async def node_qa_editor(state: ContentGenerationState) -> dict[str, Any]:
                 "retry_count": retry_count + 1,
             }
 
+        # Recuperar feedback de los agentes especialistas
+        hook_feedback = state.get("hook_feedback", "")
+        seo_feedback = state.get("seo_feedback", "")
+
         # Capa 2: LLM QA
         from core.llm.providers import groq_provider
 
@@ -393,6 +531,10 @@ async def node_qa_editor(state: ContentGenerationState) -> dict[str, Any]:
             f"## Brief de Marca\n\n{state.get('brand_insights', 'Sin brief disponible.')}\n\n"
             f"## Datos Originales del Usuario\n\n"
             f"{state.get('analytics_data', 'Ninguno')}\n\n"
+            f"## Feedback del Agente de Enganche (Hook)\n"
+            f"{hook_feedback if hook_feedback else 'No evaluado'}\n\n"
+            f"## Feedback del Agente SEO\n"
+            f"{seo_feedback if seo_feedback else 'No evaluado'}\n\n"
             f"## Borrador a Revisar\n\n{draft}"
         )
 

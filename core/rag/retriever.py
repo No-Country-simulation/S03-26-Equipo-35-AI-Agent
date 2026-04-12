@@ -103,18 +103,37 @@ async def retrieve_context(
     # 2. Embedear la query
     query_embedding = await embed_query(query)
 
-    # 3. Llamar RPC match_embeddings en Supabase
+    # 3. Llamar RPC match_embeddings_hybrid en Supabase (Fase 2: RAG Híbrido)
+    # Fallback automático a match_embeddings si la función híbrida no existe aún
     client = get_admin_client()
 
-    result = client.rpc(
-        "match_embeddings",
-        {
-            "query_embedding": query_embedding,
-            "match_org_id": org_id,
-            "match_count": top_k,
-            "match_threshold": match_threshold,
-        },
-    ).execute()
+    try:
+        result = client.rpc(
+            "match_embeddings_hybrid",
+            {
+                "query_embedding": query_embedding,
+                "query_text": query.strip(),
+                "match_org_id": org_id,
+                "match_count": top_k,
+                "match_threshold": match_threshold,
+            },
+        ).execute()
+        logger.info("retriever_hybrid_rpc_used", org_id=org_id)
+    except Exception as hybrid_err:
+        logger.info(
+            "retriever_hybrid_fallback",
+            reason=str(hybrid_err)[:80],
+            org_id=org_id,
+        )
+        result = client.rpc(
+            "match_embeddings",
+            {
+                "query_embedding": query_embedding,
+                "match_org_id": org_id,
+                "match_count": top_k,
+                "match_threshold": match_threshold,
+            },
+        ).execute()
 
     # 4. Convertir resultados a list[Chunk]
     chunks: list[Chunk] = []
