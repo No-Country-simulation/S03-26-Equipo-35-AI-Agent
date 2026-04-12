@@ -56,6 +56,33 @@ El pipeline de generación ejecuta un grafo con 5 nodos especializados y un cicl
 
 ---
 
+## 🔌 API Endpoints Principales
+
+Toda la API está protegida por Supabase JWT y variables de Rate Limiting por IP/Usuario.
+
+| Método | Endpoint | Descripción | Rate Limit |
+|---|---|---|---|
+| `POST` | `/stories/generate` | Inicia un job asíncrono para generar contenido. Retorna 202 Accepted con `job_id`. | 20 / hora |
+| `GET`  | `/stories/jobs/{id}`| Punteo del estado de generación en tiempo real (Redis). | - |
+| `GET`  | `/stories/` | Listado paginado con filtro de `org_id` vía RLS. | 120 / min |
+| `POST` | `/rag/ingest/url` | Ingesta contenido (web, youtube) a la base vectorial. | 30 / hora |
+| `GET`  | `.../export/image` | Generador de portadas IA vía Hugging Face FLUX.1. | 10 / hora |
+| `POST` | `.../versions/{id}/restore`| Regresa el contenido a un snapshot anterior autoguardado. | 120 / min |
+
+---
+
+## 📖 Flujo de Uso (Evaluación de Entregables)
+
+Para evaluar el sistema como **Prototipo Funcional**, recomendamos generar 3 historias con distintos tonos:
+
+1. **Inspiracional (Social Media)**: En *Nueva Historia*, elegí Instagram, poné tono *Inspiracional* y pegá un link de YouTube sobre una ONG.
+2. **Técnico (Blog Post)**: Elegí Reporte/Blog, tono *Educativo/Técnico* y usá el Chat RAG para inyectar la URL de una documentación.
+3. **Corporativo (Nota Prensa)**: Elegí Prensa, tono *Formal* e ingresá datos financieros en texto libre.
+
+Una vez generadas, entrá a **Mis Historias**, abrí el editor In-Line (Historial de versiones), dale a **Publicar Web** y generá una **Imagen IA** para completarlas profesionalmente.
+
+---
+
 ## 🚀 Setup de Desarrollo Local
 
 ### Requisitos previos

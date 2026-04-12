@@ -80,6 +80,8 @@ def fetch_api(
                     response = client.post(url, headers=headers, data=data, files=files, params=params)
                 else:
                     response = client.post(url, headers=headers, json=json, params=params)
+            elif method == "PATCH":
+                response = client.patch(url, headers=headers, json=json, params=params)
             elif method == "DELETE":
                 response = client.delete(url, headers=headers, params=params)
             else:

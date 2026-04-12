@@ -5,11 +5,15 @@ filtrando siempre por org_id para aislamiento de datos.
 
 Usa la función RPC match_embeddings de Supabase para búsqueda vectorial.
 
+Incluye caché semántico con Redis: queries repetidas en la misma org
+se resuelven instantáneamente sin llamar a Cohere ni Supabase.
+
 SEGURIDAD: Todo retrieval debe incluir filtro .eq("org_id", org_id).
 """
 
 import structlog
 
+from core.cache.redis_client import cache_get, cache_set, make_cache_key
 from core.rag import Chunk, RAGContext
 from core.rag.embedder import embed_query
 from db.client import get_admin_client
@@ -18,6 +22,9 @@ logger = structlog.get_logger()
 
 # Threshold mínimo de similarity para incluir un resultado
 DEFAULT_MATCH_THRESHOLD = 0.3
+
+# TTL del caché semántico: 1 hora
+RAG_CACHE_TTL = 3600
 
 
 async def retrieve_context(
@@ -32,11 +39,17 @@ async def retrieve_context(
     embeddings almacenados en Supabase (pgvector). Siempre filtra
     por org_id para garantizar aislamiento entre organizaciones.
 
+    Incluye caché semántico: si la misma query para la misma org
+    fue ejecutada recientemente, retorna el resultado cacheado
+    sin llamar a Cohere ni Supabase.
+
     Flujo:
-    1. Embedear la query con Cohere (input_type='search_query')
-    2. Llamar RPC match_embeddings en Supabase con filtro org_id
-    3. Convertir resultados a list[Chunk]
-    4. Retornar RAGContext
+    1. Verificar caché Redis → si hit, retornar instantáneamente
+    2. Embedear la query con Cohere (input_type='search_query')
+    3. Llamar RPC match_embeddings en Supabase con filtro org_id
+    4. Convertir resultados a list[Chunk]
+    5. Cachear resultado en Redis con TTL de 1 hora
+    6. Retornar RAGContext
 
     Args:
         query: Texto de búsqueda semántica.
@@ -59,10 +72,38 @@ async def retrieve_context(
         msg = "La query de búsqueda está vacía"
         raise ValueError(msg)
 
-    # 1. Embedear la query
+    # 1. Verificar caché semántico
+    cache_key = make_cache_key("rag", org_id, query.strip().lower())
+    cached = await cache_get(cache_key)
+
+    if cached is not None:
+        logger.info(
+            "retriever_cache_hit",
+            query_length=len(query),
+            org_id=org_id,
+            results_count=cached.get("total_results", 0),
+        )
+        # Reconstruir RAGContext desde caché
+        chunks = [
+            Chunk(
+                text=c["text"],
+                index=c["index"],
+                source_url=c.get("source_url", ""),
+                metadata=c.get("metadata", {}),
+            )
+            for c in cached.get("chunks", [])
+        ]
+        return RAGContext(
+            query=cached["query"],
+            chunks=chunks,
+            org_id=org_id,
+            total_results=cached["total_results"],
+        )
+
+    # 2. Embedear la query
     query_embedding = await embed_query(query)
 
-    # 2. Llamar RPC match_embeddings en Supabase
+    # 3. Llamar RPC match_embeddings en Supabase
     client = get_admin_client()
 
     result = client.rpc(
@@ -75,7 +116,7 @@ async def retrieve_context(
         },
     ).execute()
 
-    # 3. Convertir resultados a list[Chunk]
+    # 4. Convertir resultados a list[Chunk]
     chunks: list[Chunk] = []
     for row in result.data:
         chunks.append(
@@ -99,10 +140,27 @@ async def retrieve_context(
         top_k=top_k,
     )
 
-    # 4. Retornar RAGContext
+    # 5. Cachear resultado en Redis
+    cache_data = {
+        "query": query,
+        "total_results": len(chunks),
+        "chunks": [
+            {
+                "text": c.text,
+                "index": c.index,
+                "source_url": c.source_url,
+                "metadata": c.metadata,
+            }
+            for c in chunks
+        ],
+    }
+    await cache_set(cache_key, cache_data, ttl_seconds=RAG_CACHE_TTL)
+
+    # 6. Retornar RAGContext
     return RAGContext(
         query=query,
         chunks=chunks,
         org_id=org_id,
         total_results=len(chunks),
     )
+

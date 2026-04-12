@@ -30,6 +30,7 @@ class HealthResponse(BaseModel):
     status: str = "ok"
     version: str = "0.1.0"
     supabase: str = "unknown"
+    redis: str = "not_configured"
 
 
 class APIResponse(BaseModel):
