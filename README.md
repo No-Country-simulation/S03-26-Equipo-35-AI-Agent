@@ -228,14 +228,14 @@ autostory-builder/
 │   └── migrations/           ← SQL para Supabase (11 migraciones)
 │
 ├── frontend/                 ← UI (Streamlit — Python puro)
-│   ├── app.py                ← Entry point + login + dashboard
+│   ├── 0_inicio.py           ← Entry point + login + dashboard
 │   ├── api_client.py         ← httpx → FastAPI
 │   ├── pages/                ← 5 páginas del MVP
 │   │   ├── 1_base_de_marca.py← Ingestión RAG (URL, PDF, YouTube, audio)
 │   │   ├── 2_nueva_historia.py← Generación de contenido
 │   │   ├── 3_mis_historias.py ← Historial + editor in-line + moldes ⭐
-│   │   ├── 4_aprobaciones.py  ← Circuito de aprobación por roles
-│   │   └── 5_configuracion.py ← Perfil + gestión de Posts Dorados
+│   │   ├── 4_centro_de_aprobaciones.py ← Circuito de aprobación por roles
+│   │   └── 5_identidad_y_configuración.py ← Perfil + gestión de Posts Dorados
 │   └── components/           ← Componentes reutilizables
 │
 ├── tests/                    ← Suite de tests (pytest)

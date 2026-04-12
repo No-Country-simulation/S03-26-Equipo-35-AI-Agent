@@ -73,8 +73,8 @@ def show_dashboard():
         if st.button("✦ Nueva historia \n\nGenera contenido desde tus materiales", use_container_width=True, type="primary", key="btn_nueva_historia"):
             st.switch_page("pages/2_nueva_historia.py")
 
-        if st.button("◎ Aprobaciones \n\nRevisá el contenido pendiente", use_container_width=True, type="primary"):
-            st.switch_page("pages/4_aprobaciones.py")
+        if st.button("◎ Centro de aprobaciones \n\nRevisá el contenido pendiente", use_container_width=True, type="primary"):
+            st.switch_page("pages/4_centro_de_aprobaciones.py")
 
     with col2:
         if st.button("◈ Base de marca \n\nSincroniza el contexto RAG de tu empresa", use_container_width=True, type="primary"):
