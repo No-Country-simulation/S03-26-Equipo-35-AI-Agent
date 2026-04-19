@@ -83,7 +83,7 @@ def build_generation_graph() -> StateGraph:
     graph.add_edge(START, "retrieve_rag")
     graph.add_edge("retrieve_rag", "analyze_context")
     graph.add_edge("analyze_context", "write_content")
-    
+
     # Fase 3: Pipeline Secuencial de Especialistas
     graph.add_edge("write_content", "hook_agent")
     graph.add_edge("hook_agent", "seo_agent")

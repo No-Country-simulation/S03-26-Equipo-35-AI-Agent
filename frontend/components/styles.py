@@ -214,6 +214,19 @@ def inject_global_styles() -> None:
     </style>
     """, unsafe_allow_html=True)
 
+    # ── Perfil persistente en Barra Lateral ──
+    if "token" in st.session_state and "user" in st.session_state:
+        # Extraemos variables o dejamos defaults simples para no crashear
+        user_email = st.session_state["user"].get("email", "Usuario Desconocido")
+
+        st.sidebar.markdown("### Perfil de Usuario")
+        st.sidebar.markdown(f"**Usuario:** {user_email}")
+        st.sidebar.markdown("**Rol:** Admin (MVP Default)")
+        st.sidebar.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
+        if st.sidebar.button("Cerrar sesión", type="secondary", use_container_width=True, key="btn_logout_global"):
+            st.session_state.clear()
+            st.rerun()
+
 
 # Helpers visuales reutilizables
 

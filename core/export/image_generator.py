@@ -10,6 +10,7 @@ Requiere: HUGGINGFACE_API_KEY en .env (free tier: ~1000 req/mes)
 """
 
 import os
+import re
 from io import BytesIO
 
 import structlog
@@ -28,18 +29,18 @@ HF_MODELS = [
 HF_TIMEOUT = 120  # segundos — los modelos de imagen pueden tardar
 
 
-import re
+
 
 def _build_image_prompt(title: str, story_type: str, content: str = "") -> str:
     """Construye un prompt optimizado para generación de imagen.
 
     Genera un prompt en inglés (mejor para modelos de difusión)
-    basado en el título y tipo de historia.
+    basado en el contenido real de la historia, NO en las instrucciones del prompt.
 
     Args:
-        title: Título de la historia.
+        title: Título de la historia (puede contener instrucciones si no se limpió bien).
         story_type: Tipo de contenido (blog, social, press, etc).
-        content: Contenido generado de la historia (opcional).
+        content: Contenido generado de la historia (USAR ESTO preferentemente).
 
     Returns:
         Prompt optimizado para el modelo de imagen.
@@ -60,46 +61,90 @@ def _build_image_prompt(title: str, story_type: str, content: str = "") -> str:
 
     style = style_hints.get(story_type, "modern digital illustration, professional")
 
-    # ── Limpiar el título para obtener el sujeto real ──
-    clean_topic = title.lower()
-    if " - " in clean_topic:
-        clean_topic = clean_topic.split(" - ", 1)[1]
-    
-    stopwords = [
-        "escribe un post sobre", "crea una publicacion sobre", 
-        "escribe sobre", "crea un post de", "un post de",
-        "publicacion sobre", "post sobre", "hilo de twitter sobre",
-        "articulo sobre", "un resumen de"
-    ]
-    for w in stopwords:
-        clean_topic = clean_topic.replace(w, "")
-    clean_topic = clean_topic.strip()
-    
-    if not clean_topic:
-        clean_topic = title
+    # ── Extraer el tema real del contenido generado ──
+    # Usar el contenido es más confiable que el título (que puede tener instrucciones)
+    topic_from_content = ""
+    if content:
+        # Limpiar markdown y extraer primera línea significativa
+        clean_content = re.sub(r'[#*_>]', '', content).strip()
+        lines = [l.strip() for l in clean_content.split('\n') if l.strip()]
 
-    # ── Extraer un resumen corto del contenido para el texto de la imagen ──
+        # Buscar la primera línea que no sea "ROL" ni instrucciones
+        for line in lines[:5]:
+            line_lower = line.lower()
+            if any(bad in line_lower for bad in ['eres un', 'rol:', 'actua como', 'instrucciones', 'gestor', 'community manager']):
+                continue
+            if len(line) > 10:  # Línea sustancial
+                topic_from_content = line
+                break
+
+        # Si no encontramos nada, usar las primeras palabras del contenido
+        if not topic_from_content:
+            words = clean_content.split()[:8]
+            topic_from_content = ' '.join(words)
+
+    # ── Limpiar el título como fallback ──
+    clean_title = title
+    if " - " in clean_title:
+        clean_title = clean_title.split(" - ", 1)[1]
+
+    # Remover stopwords del título
+    stopwords = [
+        "escribe", "crea", "un post", "una publicacion", "sobre",
+        "post de", "publicacion sobre", "hilo de", "articulo",
+        "resumen de", "redacta", "genera", "elabora", "desarrolla",
+        "#", "rol", "gestor", "community", "manager"
+    ]
+    clean_title_lower = clean_title.lower()
+    for w in stopwords:
+        clean_title_lower = clean_title_lower.replace(w, "")
+    clean_title = clean_title_lower.strip()
+
+    # ── Decidir qué usar como tema ──
+    # Preferir el tema extraído del contenido sobre el título
+    if topic_from_content and len(topic_from_content) > 5:
+        # Limpiar el tema del contenido
+        clean_topic = topic_from_content[:100]  # Limitar longitud
+    elif clean_title and len(clean_title) > 3:
+        clean_topic = clean_title
+    else:
+        clean_topic = "social media content"
+
+    # ── Extraer frase hook para el texto de la imagen ──
     text_to_draw = ""
     if content:
-        # Remover markdown y dejar puro texto
-        clean_content = re.sub(r'[*#_>-]', '', content).strip()
-        words = clean_content.split()
-        if len(words) >= 4:
-            # Seleccionamos las primeras 4 palabras como título tipográfico
-            text_to_draw = " ".join(words[:4]).replace('"', '').replace("'", "")
-            text_to_draw = text_to_draw.title()
-    
+        # Buscar una frase corta impactante (hook) del contenido real
+        clean_content = re.sub(r'[#*_>\-\"\']', '', content).strip()
+
+        # Buscar líneas cortas que podrían ser hooks (3-6 palabras)
+        lines = [l.strip() for l in clean_content.split('\n') if l.strip()]
+        for line in lines:
+            words = line.split()
+            if 3 <= len(words) <= 8:
+                # Evitar líneas con palabras de instrucciones
+                line_lower = line.lower()
+                if not any(bad in line_lower for bad in ['eres', 'rol:', 'gestor', 'debes', 'tarea']):
+                    text_to_draw = line[:50]  # Limitar a 50 chars
+                    break
+
+        # Si no encontramos hook, usar primeras 4 palabras del contenido limpio
+        if not text_to_draw:
+            words = [w for w in clean_content.split() if len(w) > 2][:4]
+            if words:
+                text_to_draw = ' '.join(words)
+
     prompt = (
-        f"Create a high-quality illustration for the concept: {clean_topic}. "
+        f"Create a high-quality illustration for: {clean_topic}. "
         f"Style: {style}. "
     )
-    
-    if text_to_draw:
-        prompt += f'The image MUST feature the exact typography text "{text_to_draw}" integrated elegantly into the design in a bold, readable font. '
-    else:
-        prompt += "No text in the image. "
 
-    prompt += "High resolution, 4K quality, detailed, well-composed."
+    if text_to_draw:
+        prompt += f'Include the text "{text_to_draw}" prominently in the image as a headline, using bold readable typography. '
+    else:
+        prompt += "No text overlay, pure illustration only. "
+
+    prompt += "High resolution, professional quality, well-composed, 4K."
+    logger.info("image_prompt_built", topic=clean_topic[:50], text=text_to_draw[:30] if text_to_draw else "none")
     return prompt
 
 

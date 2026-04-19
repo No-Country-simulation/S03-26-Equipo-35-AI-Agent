@@ -18,9 +18,6 @@ load_dotenv()
 
 logger = structlog.get_logger()
 
-# Configuración
-GEMINI_TIMEOUT = 30  # segundos
-
 
 def _get_client() -> None:
     """Configura el cliente Gemini con la API key.

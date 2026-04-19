@@ -9,6 +9,7 @@ Flujo crítico de generación:
 """
 
 import json
+import os
 import time
 import uuid
 from typing import Annotated, Any
@@ -23,7 +24,11 @@ from api.rate_limiter import rate_limit_generation, rate_limit_image
 from api.schemas import CurrentUser
 from core.agents.graph import run_generation_graph
 from core.llm.prompt_builder import resolve_temperature
-from core.multimedia.storage import upload_file
+from core.stories.helpers import (
+    extract_title_from_content,
+    process_upload_files,
+    save_generated_story,
+)
 from db.client import get_admin_client
 
 logger = structlog.get_logger()
@@ -72,15 +77,6 @@ def _resolve_db_story_type(story_type: str) -> str:
 
 
 # ── Schemas ──
-
-
-class GenerateRequest(BaseModel):
-    """Schema de request para generación de historia."""
-
-    task: str
-    story_type: str = "blog"
-    tone: str = "profesional"
-    has_image: bool = False
 
 
 class GenerateResponse(BaseModel):
@@ -257,25 +253,7 @@ async def generate_story(
     temperature = resolve_temperature(creativity)
 
     # Procesar archivos multimedia (Upload → Storage) antes del grafo
-    uploaded_assets: list[dict[str, Any]] = []
-    if files:
-        try:
-            for f in files:
-                file_bytes = await f.read()
-                metadata = await upload_file(
-                    file_bytes=file_bytes,
-                    filename=f.filename,
-                    content_type=f.content_type,
-                    org_id=org_id,
-                )
-                uploaded_assets.append({
-                    "url": metadata["public_url"],
-                    "filename": metadata["filename"],
-                    "content_type": metadata["content_type"],
-                    "bytes": file_bytes,
-                })
-        except Exception as e:
-            logger.warning("file_upload_failed", error=str(e)[:100], org_id=org_id)
+    uploaded_assets = await process_upload_files(files, org_id)
 
     # ── Modo Async (Redis disponible) ──
     from core.cache.redis_client import is_redis_available
@@ -345,43 +323,29 @@ async def generate_story(
     # Guardar historia en DB
     try:
         client = get_admin_client()
-
         db_story_type = _resolve_db_story_type(story_type)
-
         content = result["final_content"]
-        title = task[:100]
-        if content.startswith("#"):
-            first_line = content.split("\n")[0]
-            title = first_line.lstrip("# ").strip() or title
 
-        story_result = client.table("stories").insert({
-            "org_id": org_id,
-            "title": f"{story_type.title()} - {task[:20]}...",
-            "content": content,
-            "story_type": db_story_type,
-            "status": "borrador",
-            "created_by": current_user.user_id,
-            "prompt_used": task,
-            "llm_provider": result.get("provider", ""),
-            "credits_used": 0,
-            "multimedia_count": len(uploaded_assets),
-            "metadata": {
-                "network": story_type,
-                "model": result.get("model", ""),
-                "tokens_used": result.get("tokens_used", 0),
-                "latency_ms": result.get("latency_ms", 0),
+        story_id = save_generated_story(
+            client=client,
+            org_id=org_id,
+            user_id=current_user.user_id,
+            task=task,
+            content=content,
+            story_type=story_type,
+            db_story_type=db_story_type,
+            result=result,
+            uploaded_assets=uploaded_assets,
+            extra_metadata={
                 "tone": tone,
                 "audience": audience,
                 "length": length,
                 "creativity": creativity,
                 "has_analytics": bool(analytics_data.strip()),
-                "qa_approved": result.get("qa_approved", False),
-                "retry_count": result.get("retry_count", 0),
-                "graph_status": result.get("status", "ok"),
             },
-        }).execute()
+        )
 
-        story_id = str(story_result.data[0]["id"])
+        title = extract_title_from_content(task, content)
 
     except Exception as e:
         logger.error("story_save_failed", error=str(e)[:100], org_id=org_id)
@@ -473,25 +437,7 @@ async def generate_multi_network(
         )
 
     # Procesar archivos multimedia (una sola vez para todas las redes)
-    uploaded_assets: list[dict[str, Any]] = []
-    if files:
-        try:
-            for f in files:
-                file_bytes = await f.read()
-                metadata = await upload_file(
-                    file_bytes=file_bytes,
-                    filename=f.filename,
-                    content_type=f.content_type,
-                    org_id=org_id,
-                )
-                uploaded_assets.append({
-                    "url": metadata["public_url"],
-                    "filename": metadata["filename"],
-                    "content_type": metadata["content_type"],
-                    "bytes": file_bytes,
-                })
-        except Exception as e:
-            logger.warning("multi_file_upload_failed", error=str(e)[:100], org_id=org_id)
+    uploaded_assets = await process_upload_files(files, org_id)
 
     # Generar secuencialmente por cada red usando el grafo multi-agente
     results: list[NetworkResult] = []
@@ -520,38 +466,26 @@ async def generate_multi_network(
             # Guardar en DB
             client = get_admin_client()
             content = result["final_content"]
-            title = task[:100]
-            if content.startswith("#"):
-                first_line = content.split("\n")[0]
-                title = first_line.lstrip("# ").strip() or title
+            title = extract_title_from_content(task, content)
 
-            story_result = client.table("stories").insert({
-                "org_id": org_id,
-                "title": f"{network.title()} - {task[:20]}...",
-                "content": content,
-                "story_type": db_story_type,
-                "status": "borrador",
-                "created_by": current_user.user_id,
-                "prompt_used": task,
-                "llm_provider": result.get("provider", ""),
-                "credits_used": 0,
-                "multimedia_count": len(uploaded_assets),
-                "metadata": {
-                    "network": network,
-                    "model": result.get("model", ""),
-                    "tokens_used": result.get("tokens_used", 0),
-                    "latency_ms": result.get("latency_ms", 0),
+            story_id = save_generated_story(
+                client=client,
+                org_id=org_id,
+                user_id=current_user.user_id,
+                task=task,
+                content=content,
+                story_type=network,
+                db_story_type=db_story_type,
+                result=result,
+                uploaded_assets=uploaded_assets,
+                extra_metadata={
                     "tone": tone,
                     "audience": audience,
                     "length": length,
                     "creativity": creativity,
                     "generated_as_multi": True,
-                    "qa_approved": result.get("qa_approved", False),
-                    "retry_count": result.get("retry_count", 0),
                 },
-            }).execute()
-
-            story_id = str(story_result.data[0]["id"])
+            )
 
             results.append(NetworkResult(
                 network=network,
@@ -922,7 +856,6 @@ async def share_story(
     # Si ya tiene share_token, retornarlo
     existing_token = check.data[0].get("share_token")
     if existing_token:
-        import os
         api_base = os.getenv("API_BASE_URL", "http://localhost:8000")
         return ShareResponse(
             share_token=existing_token,
@@ -937,7 +870,6 @@ async def share_story(
         {"share_token": share_token}
     ).eq("id", story_id).eq("org_id", current_user.org_id).execute()
 
-    import os
     api_base = os.getenv("API_BASE_URL", "http://localhost:8000")
 
     logger.info("story_shared", story_id=story_id, org_id=current_user.org_id)

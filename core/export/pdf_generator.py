@@ -12,6 +12,18 @@ import re
 import structlog
 from fpdf import FPDF
 
+
+def _sanitize_for_pdf(text: str) -> str:
+    """Sanitiza texto para compatibilidad con fuentes PDF built-in.
+
+    Las fuentes built-in de fpdf2 (Helvetica, Times, Courier) solo soportan
+    Latin-1. Esta funcion remueve emojis y caracteres no-ASCII.
+    """
+    if not text:
+        return ""
+    # Solo mantener caracteres ASCII imprimibles (32-126) y whitespace basicos
+    return ''.join(c for c in text if ord(c) < 128)
+
 logger = structlog.get_logger()
 
 # Directorio de fuentes (usamos las built-in de fpdf2 para simplificar)
@@ -46,7 +58,7 @@ class StoryPDF(FPDF):
         self.set_y(-15)
         self.set_font("Helvetica", "I", 8)
         self.set_text_color(150, 150, 150)
-        self.cell(0, 10, f"Página {self.page_no()}/{{nb}}", align="C")
+        self.cell(0, 10, f"Pagina {self.page_no()}/{{nb}}", align="C")
 
 
 def _strip_markdown(text: str) -> list[dict[str, str]]:
@@ -117,10 +129,11 @@ def generate_story_pdf(
     # ── Título principal ──
     pdf.set_font("Helvetica", "B", 20)
     pdf.set_text_color(40, 40, 40)
+    clean_title = _sanitize_for_pdf(title)
     pdf.multi_cell(
         w=_CONTENT_WIDTH,
         h=10,
-        text=title,
+        text=clean_title,
         align="L",
         new_x="LMARGIN",
         new_y="NEXT",
@@ -153,22 +166,25 @@ def generate_story_pdf(
         block_type = block["type"]
         text = block["text"]
 
+        # Sanitizar texto para PDF (remover caracteres no-ASCII)
+        clean_text = _sanitize_for_pdf(text)
+
         if block_type == "h1":
             pdf.set_font("Helvetica", "B", 16)
             pdf.set_text_color(40, 40, 40)
-            pdf.multi_cell(w=_CONTENT_WIDTH, h=8, text=text, new_x="LMARGIN", new_y="NEXT")
+            pdf.multi_cell(w=_CONTENT_WIDTH, h=8, text=clean_text, new_x="LMARGIN", new_y="NEXT")
             pdf.ln(3)
 
         elif block_type == "h2":
             pdf.set_font("Helvetica", "B", 13)
             pdf.set_text_color(60, 60, 60)
-            pdf.multi_cell(w=_CONTENT_WIDTH, h=7, text=text, new_x="LMARGIN", new_y="NEXT")
+            pdf.multi_cell(w=_CONTENT_WIDTH, h=7, text=clean_text, new_x="LMARGIN", new_y="NEXT")
             pdf.ln(2)
 
         elif block_type == "h3":
             pdf.set_font("Helvetica", "B", 11)
             pdf.set_text_color(80, 80, 80)
-            pdf.multi_cell(w=_CONTENT_WIDTH, h=7, text=text, new_x="LMARGIN", new_y="NEXT")
+            pdf.multi_cell(w=_CONTENT_WIDTH, h=7, text=clean_text, new_x="LMARGIN", new_y="NEXT")
             pdf.ln(2)
 
         elif block_type == "list":
@@ -179,7 +195,7 @@ def generate_story_pdf(
             pdf.multi_cell(
                 w=_CONTENT_WIDTH - 6,
                 h=6,
-                text=f"•  {text}",
+                text=f"-  {clean_text}",
                 new_x="LMARGIN",
                 new_y="NEXT",
             )
@@ -188,7 +204,7 @@ def generate_story_pdf(
         else:  # paragraph
             pdf.set_font("Helvetica", "", 10)
             pdf.set_text_color(50, 50, 50)
-            pdf.multi_cell(w=_CONTENT_WIDTH, h=6, text=text, new_x="LMARGIN", new_y="NEXT")
+            pdf.multi_cell(w=_CONTENT_WIDTH, h=6, text=clean_text, new_x="LMARGIN", new_y="NEXT")
             pdf.ln(3)
 
     # ── Output ──

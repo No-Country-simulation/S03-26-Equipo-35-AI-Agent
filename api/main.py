@@ -129,9 +129,9 @@ async def public_story(share_token: str):
     from fastapi.responses import HTMLResponse
 
     from core.export.html_renderer import render_story_html
+    from db.client import get_admin_client
 
-    client_mod = __import__("db.client", fromlist=["get_admin_client"])
-    client = client_mod.get_admin_client()
+    client = get_admin_client()
 
     result = (
         client.table("stories")

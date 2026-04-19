@@ -9,13 +9,15 @@ Funcionalidades:
 """
 import streamlit as st
 from api_client import fetch_api
-from components.styles import inject_global_styles, render_page_header, render_status_badge
-
-st.set_page_config(page_title="Mis Historias", page_icon="📚", layout="wide")
-inject_global_styles()
+from components.styles import render_page_header, render_status_badge
 
 if "token" not in st.session_state:
-    st.switch_page("app.py")
+    st.warning("Debes iniciar sesión para acceder a esta página.")
+    st.markdown(
+        '<meta http-equiv="refresh" content="0; url=./" />',
+        unsafe_allow_html=True,
+    )
+    st.stop()
 
 render_page_header(
     "Mis <em>Historias</em>",
@@ -62,7 +64,7 @@ try:
                 """, unsafe_allow_html=True)
 
                 # ── Botones de acción en una fila ──
-                btn_cols = st.columns([1, 1, 1, 1, 1, 1.3])
+                btn_cols = st.columns([1, 1, 1, 1, 1.3])
 
                 with btn_cols[0]:
                     edit_key = f"edit_{story_id}_{idx}"
@@ -140,19 +142,6 @@ try:
                             share_url = result.get("share_url", "")
                             st.success("¡Historia publicada!")
                             st.code(share_url, language=None)
-                        except Exception as e:
-                            st.error(f"Error: {e}")
-
-                with btn_cols[5]:
-                    gold_key = f"gold_{story_id}_{idx}"
-                    if st.button("⭐ Convertir en Molde", key=gold_key, help="Guardar como ejemplo Few-Shot ideal para la voz de marca", use_container_width=True):
-                        try:
-                            fetch_api(
-                                f"/golden-examples/from-story/{story_id}",
-                                method="POST",
-                                json={"story_type": "", "tone": "profesional"}
-                            )
-                            st.success("✅ ¡Molde dorado guardado (Max 3/3)!")
                         except Exception as e:
                             st.error(f"Error: {e}")
 

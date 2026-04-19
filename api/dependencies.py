@@ -105,19 +105,3 @@ async def get_current_org(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token inválido o expirado",
         ) from e
-
-
-async def get_current_user_role(
-    current_user: Annotated[CurrentUser, Depends(get_current_org)],
-) -> str:
-    """Extrae el rol del usuario autenticado.
-
-    Depende de get_current_org() — reutiliza la verificación del JWT.
-
-    Args:
-        current_user: Usuario autenticado resuelto por get_current_org().
-
-    Returns:
-        Rol del usuario ('editor', 'revisor', 'admin').
-    """
-    return current_user.role

@@ -2,13 +2,15 @@
 import streamlit as st
 from api_client import fetch_api
 from components.loading_states import simulate_loading_animation
-from components.styles import inject_global_styles, render_page_header
-
-st.set_page_config(page_title="Nueva Historia", page_icon="✍️", layout="wide")
-inject_global_styles()
+from components.styles import render_page_header
 
 if "token" not in st.session_state:
-    st.switch_page("app.py")
+    st.warning("Debes iniciar sesión para acceder a esta página.")
+    st.markdown(
+        '<meta http-equiv="refresh" content="0; url=./" />',
+        unsafe_allow_html=True,
+    )
+    st.stop()
 
 render_page_header(
     "Nueva <em>Historia</em>",

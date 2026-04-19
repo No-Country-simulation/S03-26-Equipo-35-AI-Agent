@@ -85,6 +85,7 @@ Toda la API está protegida por Supabase JWT y Rate Limiting por IP/Usuario.
 | `GET`  | `/stories/` | Listado paginado con filtro de `org_id` vía RLS. | 120 / min |
 | `POST` | `/rag/ingest/url` | Ingesta contenido (web, youtube) a la base vectorial. | 30 / hora |
 | `GET`  | `/stories/{id}/export/image` | Generador de portadas IA vía Hugging Face FLUX.1. | 10 / hora |
+| `GET`  | `/stories/{id}/export/pdf` | Exporta historia a PDF con tipografía profesional. | 30 / hora |
 | `POST` | `/stories/{id}/versions/{vid}/restore` | Regresa el contenido a un snapshot anterior autoguardado. | 120 / min |
 | `GET`  | `/golden-examples/` | Lista los Posts Dorados (moldes de estilo) de la organización. | 120 / min |
 | `POST` | `/golden-examples/` | Guarda un ejemplo dorado manualmente (FIFO, máx 3/tipo/tono). | 30 / hora |
@@ -112,7 +113,7 @@ Una vez generadas, entrá a **Mis Historias**, abrí el editor In-Line (Historia
 - Python 3.11+
 - [`uv`](https://docs.astral.sh/uv/) instalado a nivel sistema
 - Cuenta en [Supabase](https://supabase.com)
-- Credenciales API para: Groq, Google AI, Cohere, OpenRouter
+- Credenciales API para: Groq, Google AI, Cohere, OpenRouter, Hugging Face
 
 ### Instalación
 
@@ -228,13 +229,13 @@ autostory-builder/
 │   └── migrations/           ← SQL para Supabase (11 migraciones)
 │
 ├── frontend/                 ← UI (Streamlit — Python puro)
-│   ├── 0_inicio.py           ← Entry point + login + dashboard
+│   ├── app.py                ← Entry point (st.navigation) + login + dashboard
 │   ├── api_client.py         ← httpx → FastAPI
 │   ├── pages/                ← 5 páginas del MVP
 │   │   ├── 1_base_de_marca.py← Ingestión RAG (URL, PDF, YouTube, audio)
 │   │   ├── 2_nueva_historia.py← Generación de contenido
 │   │   ├── 3_mis_historias.py ← Historial + editor in-line + moldes ⭐
-│   │   ├── 4_centro_de_aprobaciones.py ← Circuito de aprobación por roles
+│   │   ├── 4_centro_de_aprobaciones.py  ← Circuito de aprobación por roles
 │   │   └── 5_identidad_y_configuración.py ← Perfil + gestión de Posts Dorados
 │   └── components/           ← Componentes reutilizables
 │
@@ -276,6 +277,8 @@ BORRADOR → EN_REVISION → APROBADO → PUBLICADO
 | **Editor** | Crea borradores, envía a revisión |
 | **Revisor** | Aprueba o rechaza contenido |
 | **Admin** | Publica contenido, acceso completo |
+
+> **Nota MVP:** Para facilitar testing local, el rol `editor` temporalmente tiene permisos ampliados: puede aprobar, rechazar y publicar contenido. En producción, estos permisos se restringirían al flujo original.
 
 ---
 

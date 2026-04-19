@@ -209,7 +209,6 @@ async def node_analyze_context(state: ContentGenerationState) -> dict[str, Any]:
         system_prompt = _load_agent_prompt("analyst")
 
         # Llamar a Gemini Flash como agente analista
-        from core.llm.providers import gemini_provider
         start = time.perf_counter()
         response = await gemini_provider.generate(
             prompt=user_prompt,
@@ -386,7 +385,7 @@ async def node_write_content(state: ContentGenerationState) -> dict[str, Any]:
 
 async def node_hook_agent(state: ContentGenerationState) -> dict[str, Any]:
     """Evalúa la calidad narrativa de las primeras 2 líneas (el gancho).
-    
+
     Agente: Groq Llama 3.3 70B (rápido y analítico).
     """
     try:
@@ -395,9 +394,9 @@ async def node_hook_agent(state: ContentGenerationState) -> dict[str, Any]:
             return {"hook_feedback": ""}
 
         from core.llm.providers import groq_provider
-        
+
         system_prompt = _load_agent_prompt("hook_agent")
-        
+
         # Extraer primeras 3 líneas para no distraer al agente
         lines = [line.strip() for line in draft.split("\n") if line.strip()]
         first_lines = "\n".join(lines[:3])
@@ -434,7 +433,7 @@ async def node_hook_agent(state: ContentGenerationState) -> dict[str, Any]:
 
 async def node_seo_agent(state: ContentGenerationState) -> dict[str, Any]:
     """Evalúa la optimización del contenido para algoritmos orgánicos.
-    
+
     Agente: Groq Llama 3.3 70B.
     """
     try:
@@ -443,9 +442,9 @@ async def node_seo_agent(state: ContentGenerationState) -> dict[str, Any]:
             return {"seo_feedback": ""}
 
         from core.llm.providers import groq_provider
-        
+
         system_prompt = _load_agent_prompt("seo_agent")
-        
+
         user_prompt = (
             f"## Plataforma Destino\n{state['story_type']}\n\n"
             f"## Borrador a evaluar\n\n{draft}"

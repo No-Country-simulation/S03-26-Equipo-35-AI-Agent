@@ -16,6 +16,7 @@ from typing import Any
 
 import structlog
 
+from api.routers.stories import _resolve_db_story_type
 from core.cache.redis_client import job_set_status
 
 logger = structlog.get_logger()
@@ -98,49 +99,39 @@ async def run_generation_job(
         # ── Paso 2: Guardar historia en DB ──
         await job_set_status(job_id, "processing", PROGRESS_MESSAGES["saving"])
 
+        from core.stories.helpers import extract_title_from_content, save_generated_story
         from db.client import get_admin_client
 
         client = get_admin_client()
 
-        # Resolver tipo de historia para DB
-        valid_types = {"blog", "social", "internal", "press", "email"}
-        db_story_type = story_type if story_type in valid_types else "social"
+        # Resolver tipo de historia para DB (misma lógica que el router sync)
+        db_story_type = _resolve_db_story_type(story_type)
 
         content = result["final_content"]
-        title = task[:100]
-        if content.startswith("#"):
-            first_line = content.split("\n")[0]
-            title = first_line.lstrip("# ").strip() or title
-
         latency_ms = (time.perf_counter() - start_time) * 1000
 
-        story_result = client.table("stories").insert({
-            "org_id": org_id,
-            "title": f"{story_type.title()} - {task[:20]}...",
-            "content": content,
-            "story_type": db_story_type,
-            "status": "borrador",
-            "created_by": user_id,
-            "prompt_used": task,
-            "llm_provider": result.get("provider", ""),
-            "credits_used": 0,
-            "multimedia_count": len(uploaded_assets),
-            "metadata": {
-                "network": story_type,
-                "model": result.get("model", ""),
-                "tokens_used": result.get("tokens_used", 0),
-                "latency_ms": round(latency_ms, 2),
+        # Inyectar latency calculada en el resultado para el helper
+        result["latency_ms"] = round(latency_ms, 2)
+
+        story_id = save_generated_story(
+            client=client,
+            org_id=org_id,
+            user_id=user_id,
+            task=task,
+            content=content,
+            story_type=story_type,
+            db_story_type=db_story_type,
+            result=result,
+            uploaded_assets=uploaded_assets,
+            extra_metadata={
                 "tone": tone,
                 "audience": audience,
                 "length": length,
-                "qa_approved": result.get("qa_approved", False),
-                "retry_count": result.get("retry_count", 0),
-                "graph_status": result.get("status", "ok"),
                 "async_job": True,
             },
-        }).execute()
+        )
 
-        story_id = str(story_result.data[0]["id"])
+        title = extract_title_from_content(task, content)
 
         # ── Paso 3: Marcar como completado ──
         await job_set_status(

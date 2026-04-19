@@ -22,11 +22,8 @@ logger = structlog.get_logger()
 # Límite de Cohere: 96 textos por request
 COHERE_BATCH_SIZE = 96
 
-# Modelo de embedding
+# Modelo de embedding (Cohere embed-multilingual-v3 genera vectores de 1024 dims)
 COHERE_MODEL = "embed-multilingual-v3.0"
-
-# Dimensiones esperadas (Cohere embed-multilingual-v3 = 1024)
-EXPECTED_DIMS = 1024
 
 
 def _get_cohere_client() -> cohere.ClientV2:

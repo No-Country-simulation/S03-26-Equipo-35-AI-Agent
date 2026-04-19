@@ -31,6 +31,34 @@ ALLOWED_FILE_TYPES = {
 }
 
 
+def _store_embeddings(
+    client: object,
+    org_id: str,
+    document_id: str,
+    embedded_chunks: list,
+) -> None:
+    """Persiste los chunks embedidos en la tabla embeddings de Supabase.
+
+    Args:
+        client: Cliente Supabase admin.
+        org_id: UUID de la organización.
+        document_id: UUID del documento al que pertenecen los chunks.
+        embedded_chunks: Lista de EmbeddedChunk con chunk y embedding.
+    """
+    embedding_rows = [
+        {
+            "org_id": org_id,
+            "document_id": document_id,
+            "chunk_text": ec.chunk.text,
+            "chunk_index": ec.chunk.index,
+            "embedding": ec.embedding,
+            "metadata": ec.chunk.metadata,
+        }
+        for ec in embedded_chunks
+    ]
+    client.table("embeddings").insert(embedding_rows).execute()
+
+
 # ── Schemas ──
 
 
@@ -120,19 +148,7 @@ async def ingest_content(
         document_id = doc_result.data[0]["id"]
 
         # 4b. Insertar embeddings
-        embedding_rows = [
-            {
-                "org_id": org_id,
-                "document_id": document_id,
-                "chunk_text": ec.chunk.text,
-                "chunk_index": ec.chunk.index,
-                "embedding": ec.embedding,
-                "metadata": ec.chunk.metadata,
-            }
-            for ec in embedded
-        ]
-
-        client.table("embeddings").insert(embedding_rows).execute()
+        _store_embeddings(client, org_id, document_id, embedded)
 
         logger.info(
             "rag_ingest_success",
@@ -281,18 +297,7 @@ async def ingest_file(
 
         document_id = doc_result.data[0]["id"]
 
-        embedding_rows = [
-            {
-                "org_id": org_id,
-                "document_id": document_id,
-                "chunk_text": ec.chunk.text,
-                "chunk_index": ec.chunk.index,
-                "embedding": ec.embedding,
-                "metadata": ec.chunk.metadata,
-            }
-            for ec in embedded
-        ]
-        client.table("embeddings").insert(embedding_rows).execute()
+        _store_embeddings(client, org_id, document_id, embedded)
 
         logger.info(
             "rag_ingest_file_success",
@@ -381,18 +386,7 @@ async def ingest_text(
 
         document_id = doc_result.data[0]["id"]
 
-        embedding_rows = [
-            {
-                "org_id": org_id,
-                "document_id": document_id,
-                "chunk_text": ec.chunk.text,
-                "chunk_index": ec.chunk.index,
-                "embedding": ec.embedding,
-                "metadata": ec.chunk.metadata,
-            }
-            for ec in embedded
-        ]
-        client.table("embeddings").insert(embedding_rows).execute()
+        _store_embeddings(client, org_id, document_id, embedded)
 
         logger.info(
             "rag_ingest_text_success",
@@ -477,18 +471,7 @@ async def ingest_youtube(
 
         document_id = doc_result.data[0]["id"]
 
-        embedding_rows = [
-            {
-                "org_id": org_id,
-                "document_id": document_id,
-                "chunk_text": ec.chunk.text,
-                "chunk_index": ec.chunk.index,
-                "embedding": ec.embedding,
-                "metadata": ec.chunk.metadata,
-            }
-            for ec in embedded
-        ]
-        client.table("embeddings").insert(embedding_rows).execute()
+        _store_embeddings(client, org_id, document_id, embedded)
 
         logger.info(
             "rag_ingest_youtube_success",
