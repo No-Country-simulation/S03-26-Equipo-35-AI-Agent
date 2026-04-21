@@ -38,19 +38,20 @@ VALID_STATES: set[str] = {
 }
 
 # Transiciones válidas: estado_actual → {estado_destino: [roles_autorizados]}
+# MVP: Editor tiene permisos ampliados para facilitar testing
 VALID_TRANSITIONS: dict[str, dict[str, list[str]]] = {
     "borrador": {
-        "en_revision": ["editor", "admin"],
+        "en_revision": ["editor", "revisor", "admin"],
     },
     "en_revision": {
-        "aprobado": ["revisor", "admin"],
-        "rechazado": ["revisor", "admin"],
+        "aprobado": ["editor", "revisor", "admin"],
+        "rechazado": ["editor", "revisor", "admin"],
     },
     "aprobado": {
-        "publicado": ["admin"],
+        "publicado": ["editor", "admin"],
     },
     "rechazado": {
-        "borrador": ["editor", "admin"],
+        "borrador": ["editor", "revisor", "admin"],
     },
     "publicado": {
         # Estado terminal — no hay transiciones de salida

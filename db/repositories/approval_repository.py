@@ -16,6 +16,7 @@ async def record_transition(
     from_status: str,
     to_status: str,
     changed_by: str,
+    role: str,
     comment: str = "",
 ) -> dict[str, Any]:
     """Registra una transición de estado en el historial.
@@ -27,6 +28,7 @@ async def record_transition(
         from_status: Estado anterior.
         to_status: Estado nuevo.
         changed_by: ID del usuario que realizó el cambio.
+        role: Rol del usuario que realizó el cambio.
         comment: Comentario opcional sobre la transición.
 
     Returns:
@@ -41,6 +43,7 @@ async def record_transition(
         "from_status": from_status,
         "to_status": to_status,
         "changed_by": changed_by,
+        "role": role,
         "comment": comment,
     }).execute()
     return result.data[0] if result.data else {}

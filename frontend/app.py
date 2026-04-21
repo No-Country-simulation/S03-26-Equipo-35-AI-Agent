@@ -74,11 +74,11 @@ def show_dashboard():
             st.switch_page("pages/2_nueva_historia.py")
 
         if st.button("◎ Aprobaciones \n\nRevisá el contenido pendiente", use_container_width=True, type="primary"):
-            st.switch_page("pages/4_aprobaciones.py")
+            st.switch_page("pages/4_centro_de_aprobaciones.py")
 
     with col2:
         if st.button("◈ Base de marca \n\nSincroniza el contexto RAG de tu empresa", use_container_width=True, type="primary"):
-            st.switch_page("pages/1_onboarding.py")
+            st.switch_page("pages/1_base_de_marca.py")
 
         if st.button("≡ Mis historias \n\nHistorial y versiones anteriores", use_container_width=True, type="primary"):
             st.switch_page("pages/3_mis_historias.py")
@@ -87,7 +87,7 @@ def show_dashboard():
     st.markdown('<p class="as-section-label">Recientes</p>', unsafe_allow_html=True)
 
     try:
-        real_stories = fetch_api("/stories", method="GET", params={"limit": 3})
+        real_stories = fetch_api("/stories/", method="GET", params={"limit": 3})
         if real_stories:
             recent_stories = [
                 {
@@ -117,15 +117,19 @@ def show_dashboard():
             </div>
             """, unsafe_allow_html=True)
 
-    # Botón cerrar sesión
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    if st.button("Cerrar sesión", type="secondary"):
-        st.session_state.clear()
-        st.rerun()
 
+def main_page():
+    if "token" not in st.session_state:
+        show_login()
+    else:
+        show_dashboard()
 
-# 1. Verificar sesión
-if "token" not in st.session_state:
-    show_login()
-else:
-    show_dashboard()
+p_inicio = st.Page(main_page, title="Inicio", default=True)
+p_marca = st.Page("pages/1_base_de_marca.py", title="Base de marca")
+p_historia = st.Page("pages/2_nueva_historia.py", title="Nueva historia")
+p_mis = st.Page("pages/3_mis_historias.py", title="Mis historias")
+p_aprob = st.Page("pages/4_centro_de_aprobaciones.py", title="Centro de aprobaciones")
+p_ident = st.Page("pages/5_identidad_y_configuración.py", title="Identidad")
+
+pg = st.navigation([p_inicio, p_marca, p_historia, p_mis, p_aprob, p_ident])
+pg.run()

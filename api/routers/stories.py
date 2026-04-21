@@ -8,21 +8,33 @@ Flujo crítico de generación:
   Si LLM falla → Reembolsar créditos
 """
 
+import json
+import os
 import time
+import uuid
 from typing import Annotated, Any
 
 import structlog
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
+from fastapi.responses import Response
 from pydantic import BaseModel
 
 from api.dependencies import get_current_org
+from api.rate_limiter import rate_limit_generation, rate_limit_image
 from api.schemas import CurrentUser
 from core.agents.graph import run_generation_graph
 from core.llm.prompt_builder import resolve_temperature
-from core.multimedia.storage import upload_file
+from core.stories.helpers import (
+    extract_title_from_content,
+    process_upload_files,
+    save_generated_story,
+)
 from db.client import get_admin_client
 
 logger = structlog.get_logger()
+
+# Set global para mantener referencias a background tasks (previene GC)
+_background_tasks: set = set()
 
 router = APIRouter()
 
@@ -65,15 +77,6 @@ def _resolve_db_story_type(story_type: str) -> str:
 
 
 # ── Schemas ──
-
-
-class GenerateRequest(BaseModel):
-    """Schema de request para generación de historia."""
-
-    task: str
-    story_type: str = "blog"
-    tone: str = "profesional"
-    has_image: bool = False
 
 
 class GenerateResponse(BaseModel):
@@ -219,8 +222,9 @@ async def scrape_external_context(
         ) from e
 
 
-@router.post("/generate", response_model=GenerateResponse)
+@router.post("/generate")
 async def generate_story(
+    request: Request,
     task: str = Form(...),
     story_type: str = Form("post"),
     tone: str = Form("profesional"),
@@ -230,8 +234,12 @@ async def generate_story(
     analytics_data: str = Form(""),
     files: list[UploadFile] | None = File(None),
     current_user: CurrentUser = Depends(get_current_org),
-) -> GenerateResponse:
+    _rate_limit: None = Depends(rate_limit_generation),
+) -> GenerateResponse | dict[str, Any]:
     """Genera una nueva historia usando el pipeline multi-agente LangGraph.
+
+    Si Redis está disponible: ejecuta en background y retorna 202 con job_id.
+    Si Redis no está disponible: ejecuta de forma síncrona (comportamiento original).
 
     Flujo del grafo:
     1. [RAG] Recuperar chunks de Supabase
@@ -244,31 +252,55 @@ async def generate_story(
     org_id = current_user.org_id
     temperature = resolve_temperature(creativity)
 
-    # TODO(fase-3): Reactivar sistema de créditos
-    # Flujo pendiente: calcular_costo() → verificar_y_deducir() → grafo → reembolsar si falla
-
     # Procesar archivos multimedia (Upload → Storage) antes del grafo
-    uploaded_assets: list[dict[str, Any]] = []
-    if files:
-        try:
-            for f in files:
-                file_bytes = await f.read()
-                metadata = await upload_file(
-                    file_bytes=file_bytes,
-                    filename=f.filename,
-                    content_type=f.content_type,
-                    org_id=org_id,
-                )
-                uploaded_assets.append({
-                    "url": metadata["public_url"],
-                    "filename": metadata["filename"],
-                    "content_type": metadata["content_type"],
-                    "bytes": file_bytes,
-                })
-        except Exception as e:
-            logger.warning("file_upload_failed", error=str(e)[:100], org_id=org_id)
+    uploaded_assets = await process_upload_files(files, org_id)
 
-    # Ejecutar el grafo multi-agente
+    # ── Modo Async (Redis disponible) ──
+    from core.cache.redis_client import is_redis_available
+
+    if is_redis_available():
+        import asyncio
+
+        from core.cache.redis_client import job_set_status
+        from core.tasks.generation_worker import run_generation_job
+
+        job_id = str(uuid.uuid4())
+
+        # Marcar job como queued
+        await job_set_status(job_id, "queued", "Preparando pipeline de generación...")
+
+        # Lanzar en background
+        task_ref = asyncio.create_task(
+            run_generation_job(
+                job_id=job_id,
+                task=task,
+                org_id=org_id,
+                user_id=current_user.user_id,
+                story_type=story_type,
+                tone=tone,
+                audience=audience,
+                length=length,
+                temperature=temperature,
+                analytics_data=analytics_data,
+                uploaded_assets=uploaded_assets,
+            )
+        )
+        _background_tasks.add(task_ref)
+        task_ref.add_done_callback(_background_tasks.discard)
+
+        logger.info("generation_job_queued", job_id=job_id, org_id=org_id)
+
+        return Response(
+            content=json.dumps({
+                "job_id": job_id,
+                "status": "queued",
+                "message": "Generación iniciada en background. Consultá el progreso en /stories/jobs/{job_id}",
+            }),
+            status_code=status.HTTP_202_ACCEPTED,
+            media_type="application/json",
+        )
+
+    # ── Modo Sync (fallback sin Redis) ──
     result = await run_generation_graph({
         "task": task,
         "org_id": org_id,
@@ -291,43 +323,29 @@ async def generate_story(
     # Guardar historia en DB
     try:
         client = get_admin_client()
-
         db_story_type = _resolve_db_story_type(story_type)
-
         content = result["final_content"]
-        title = task[:100]
-        if content.startswith("#"):
-            first_line = content.split("\n")[0]
-            title = first_line.lstrip("# ").strip() or title
 
-        story_result = client.table("stories").insert({
-            "org_id": org_id,
-            "title": f"{story_type.title()} - {task[:20]}...",
-            "content": content,
-            "story_type": db_story_type,
-            "status": "borrador",
-            "created_by": current_user.user_id,
-            "prompt_used": task,
-            "llm_provider": result.get("provider", ""),
-            "credits_used": 0,
-            "multimedia_count": len(uploaded_assets),
-            "metadata": {
-                "network": story_type,
-                "model": result.get("model", ""),
-                "tokens_used": result.get("tokens_used", 0),
-                "latency_ms": result.get("latency_ms", 0),
+        story_id = save_generated_story(
+            client=client,
+            org_id=org_id,
+            user_id=current_user.user_id,
+            task=task,
+            content=content,
+            story_type=story_type,
+            db_story_type=db_story_type,
+            result=result,
+            uploaded_assets=uploaded_assets,
+            extra_metadata={
                 "tone": tone,
                 "audience": audience,
                 "length": length,
                 "creativity": creativity,
                 "has_analytics": bool(analytics_data.strip()),
-                "qa_approved": result.get("qa_approved", False),
-                "retry_count": result.get("retry_count", 0),
-                "graph_status": result.get("status", "ok"),
             },
-        }).execute()
+        )
 
-        story_id = str(story_result.data[0]["id"])
+        title = extract_title_from_content(task, content)
 
     except Exception as e:
         logger.error("story_save_failed", error=str(e)[:100], org_id=org_id)
@@ -356,6 +374,31 @@ async def generate_story(
         latency_ms=result.get("latency_ms", 0),
     )
 
+
+@router.get("/jobs/{job_id}")
+async def get_job_status(
+    job_id: str,
+    current_user: Annotated[CurrentUser, Depends(get_current_org)],
+) -> dict[str, Any]:
+    """Consulta el estado de un job de generación en background.
+
+    El frontend hace polling a este endpoint cada 3 segundos
+    para obtener el progreso real del pipeline.
+
+    Returns:
+        Dict con status, progress, y result (cuando completed).
+    """
+    from core.cache.redis_client import job_get_status
+
+    job = await job_get_status(job_id)
+
+    if job is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job no encontrado o expirado",
+        )
+
+    return job
 
 @router.post("/generate-multi", response_model=MultiGenerateResponse)
 async def generate_multi_network(
@@ -394,25 +437,7 @@ async def generate_multi_network(
         )
 
     # Procesar archivos multimedia (una sola vez para todas las redes)
-    uploaded_assets: list[dict[str, Any]] = []
-    if files:
-        try:
-            for f in files:
-                file_bytes = await f.read()
-                metadata = await upload_file(
-                    file_bytes=file_bytes,
-                    filename=f.filename,
-                    content_type=f.content_type,
-                    org_id=org_id,
-                )
-                uploaded_assets.append({
-                    "url": metadata["public_url"],
-                    "filename": metadata["filename"],
-                    "content_type": metadata["content_type"],
-                    "bytes": file_bytes,
-                })
-        except Exception as e:
-            logger.warning("multi_file_upload_failed", error=str(e)[:100], org_id=org_id)
+    uploaded_assets = await process_upload_files(files, org_id)
 
     # Generar secuencialmente por cada red usando el grafo multi-agente
     results: list[NetworkResult] = []
@@ -441,38 +466,26 @@ async def generate_multi_network(
             # Guardar en DB
             client = get_admin_client()
             content = result["final_content"]
-            title = task[:100]
-            if content.startswith("#"):
-                first_line = content.split("\n")[0]
-                title = first_line.lstrip("# ").strip() or title
+            title = extract_title_from_content(task, content)
 
-            story_result = client.table("stories").insert({
-                "org_id": org_id,
-                "title": f"{network.title()} - {task[:20]}...",
-                "content": content,
-                "story_type": db_story_type,
-                "status": "borrador",
-                "created_by": current_user.user_id,
-                "prompt_used": task,
-                "llm_provider": result.get("provider", ""),
-                "credits_used": 0,
-                "multimedia_count": len(uploaded_assets),
-                "metadata": {
-                    "network": network,
-                    "model": result.get("model", ""),
-                    "tokens_used": result.get("tokens_used", 0),
-                    "latency_ms": result.get("latency_ms", 0),
+            story_id = save_generated_story(
+                client=client,
+                org_id=org_id,
+                user_id=current_user.user_id,
+                task=task,
+                content=content,
+                story_type=network,
+                db_story_type=db_story_type,
+                result=result,
+                uploaded_assets=uploaded_assets,
+                extra_metadata={
                     "tone": tone,
                     "audience": audience,
                     "length": length,
                     "creativity": creativity,
                     "generated_as_multi": True,
-                    "qa_approved": result.get("qa_approved", False),
-                    "retry_count": result.get("retry_count", 0),
                 },
-            }).execute()
-
-            story_id = str(story_result.data[0]["id"])
+            )
 
             results.append(NetworkResult(
                 network=network,
@@ -586,3 +599,299 @@ async def get_story(
         llm_provider=row.get("llm_provider"),
         created_at=row["created_at"],
     )
+
+
+# ── Edición y Versionado ──
+
+
+class StoryEditRequest(BaseModel):
+    """Schema de request para edición de historia."""
+
+    content: str | None = None
+    title: str | None = None
+    edit_summary: str = ""
+
+
+class StoryEditResponse(BaseModel):
+    """Schema de response para edición de historia."""
+
+    story_id: str
+    title: str
+    version_number: int
+    message: str = "Historia actualizada exitosamente"
+
+
+class VersionResponse(BaseModel):
+    """Schema de una versión de historia."""
+
+    id: str
+    version_number: int
+    title: str
+    content: str
+    edited_by: str | None = None
+    edit_summary: str
+    created_at: str
+
+
+@router.patch("/{story_id}", response_model=StoryEditResponse)
+async def edit_story(
+    story_id: str,
+    request: StoryEditRequest,
+    current_user: Annotated[CurrentUser, Depends(get_current_org)],
+) -> StoryEditResponse:
+    """Edita una historia guardando un snapshot de la versión anterior.
+
+    Crea una versión inmutable del contenido actual antes de aplicar
+    los cambios. Permite rollback a cualquier versión anterior.
+    """
+    from core.stories.service import update_story_with_version
+
+    if not request.content and not request.title:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Debe proveer content y/o title para editar.",
+        )
+
+    try:
+        result = await update_story_with_version(
+            story_id=story_id,
+            org_id=current_user.org_id,
+            user_id=current_user.user_id,
+            new_content=request.content,
+            new_title=request.title,
+            edit_summary=request.edit_summary,
+        )
+
+        version = result["version_created"]
+        story = result["story"]
+
+        return StoryEditResponse(
+            story_id=story_id,
+            title=story.get("title", ""),
+            version_number=version["version_number"],
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        ) from e
+
+
+@router.get("/{story_id}/versions", response_model=list[VersionResponse])
+async def list_story_versions(
+    story_id: str,
+    current_user: Annotated[CurrentUser, Depends(get_current_org)],
+) -> list[VersionResponse]:
+    """Lista todas las versiones de una historia, más recientes primero."""
+    from core.stories.service import get_story_versions
+
+    versions = await get_story_versions(story_id, current_user.org_id)
+
+    return [
+        VersionResponse(
+            id=v["id"],
+            version_number=v["version_number"],
+            title=v["title"],
+            content=v["content"][:500],  # Preview
+            edited_by=v.get("edited_by"),
+            edit_summary=v.get("edit_summary", ""),
+            created_at=v["created_at"],
+        )
+        for v in versions
+    ]
+
+
+@router.post("/{story_id}/versions/{version_id}/restore")
+async def restore_story_version(
+    story_id: str,
+    version_id: str,
+    current_user: Annotated[CurrentUser, Depends(get_current_org)],
+) -> dict[str, Any]:
+    """Restaura una historia a una versión anterior.
+
+    Guarda un snapshot del contenido actual antes de restaurar
+    para permitir deshacer la restauración.
+    """
+    from core.stories.service import restore_story_version as restore_svc
+
+    try:
+        result = await restore_svc(
+            story_id=story_id,
+            version_id=version_id,
+            org_id=current_user.org_id,
+            user_id=current_user.user_id,
+        )
+        return {
+            "message": f"Historia restaurada a versión {result['restored_from_version']}",
+            "restored_from_version": result["restored_from_version"],
+        }
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        ) from e
+
+
+# ── Exportación: PDF, Imagen, Publicación Web ──
+
+
+@router.get("/{story_id}/export/pdf")
+async def export_story_pdf(
+    story_id: str,
+    current_user: Annotated[CurrentUser, Depends(get_current_org)],
+) -> Response:
+    """Exporta una historia como archivo PDF descargable."""
+    from core.export.pdf_generator import generate_story_pdf
+
+    client = get_admin_client()
+    result = (
+        client.table("stories")
+        .select("id, title, content, story_type, created_at")
+        .eq("id", story_id)
+        .eq("org_id", current_user.org_id)
+        .execute()
+    )
+
+    if not result.data:
+        raise HTTPException(status_code=404, detail="Historia no encontrada")
+
+    row = result.data[0]
+    pdf_bytes = generate_story_pdf(
+        title=row["title"],
+        content=row["content"],
+        story_type=row.get("story_type", "blog"),
+        created_at=row.get("created_at", ""),
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="historia_{story_id[:8]}.pdf"',
+        },
+    )
+
+
+@router.get("/{story_id}/export/image")
+async def export_story_image(
+    request: Request,
+    story_id: str,
+    current_user: Annotated[CurrentUser, Depends(get_current_org)],
+    _rate_limit: None = Depends(rate_limit_image),
+) -> Response:
+    """Genera una imagen ilustrativa para la historia usando Hugging Face.
+
+    Usa FLUX.1-schnell como modelo primario, SDXL como fallback,
+    y Pillow como fallback final si HF no responde.
+    """
+    from core.export.image_generator import generate_with_huggingface
+
+    client = get_admin_client()
+    result = (
+        client.table("stories")
+        .select("id, title, story_type, content")
+        .eq("id", story_id)
+        .eq("org_id", current_user.org_id)
+        .execute()
+    )
+
+    if not result.data:
+        raise HTTPException(status_code=404, detail="Historia no encontrada")
+
+    row = result.data[0]
+
+    try:
+        image_bytes = await generate_with_huggingface(
+            title=row["title"],
+            story_type=row.get("story_type", "blog"),
+            content=row.get("content", ""),
+        )
+    except Exception as e:
+        logger.error("image_export_failed", error=str(e)[:100], story_id=story_id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al generar imagen",
+        ) from e
+
+    return Response(
+        content=image_bytes,
+        media_type="image/png",
+        headers={
+            "Content-Disposition": f'attachment; filename="historia_{story_id[:8]}.png"',
+        },
+    )
+
+
+class ShareResponse(BaseModel):
+    """Schema de response para publicación web."""
+    share_token: str
+    share_url: str
+    message: str = "Historia publicada exitosamente"
+
+
+@router.post("/{story_id}/share", response_model=ShareResponse)
+async def share_story(
+    story_id: str,
+    current_user: Annotated[CurrentUser, Depends(get_current_org)],
+) -> ShareResponse:
+    """Genera una URL pública para compartir la historia.
+
+    Crea un share_token único (UUID) y lo guarda en la historia.
+    La URL resultante es accesible sin autenticación via GET /public/{token}.
+    """
+    client = get_admin_client()
+
+    # Verificar que la historia existe y pertenece a la org
+    check = (
+        client.table("stories")
+        .select("id, share_token")
+        .eq("id", story_id)
+        .eq("org_id", current_user.org_id)
+        .execute()
+    )
+
+    if not check.data:
+        raise HTTPException(status_code=404, detail="Historia no encontrada")
+
+    # Si ya tiene share_token, retornarlo
+    existing_token = check.data[0].get("share_token")
+    if existing_token:
+        api_base = os.getenv("API_BASE_URL", "http://localhost:8000")
+        return ShareResponse(
+            share_token=existing_token,
+            share_url=f"{api_base}/public/{existing_token}",
+            message="Historia ya estaba publicada",
+        )
+
+    # Generar nuevo share_token
+    share_token = str(uuid.uuid4())
+
+    client.table("stories").update(
+        {"share_token": share_token}
+    ).eq("id", story_id).eq("org_id", current_user.org_id).execute()
+
+    api_base = os.getenv("API_BASE_URL", "http://localhost:8000")
+
+    logger.info("story_shared", story_id=story_id, org_id=current_user.org_id)
+
+    return ShareResponse(
+        share_token=share_token,
+        share_url=f"{api_base}/public/{share_token}",
+    )
+
+
+@router.delete("/{story_id}/share")
+async def unshare_story(
+    story_id: str,
+    current_user: Annotated[CurrentUser, Depends(get_current_org)],
+) -> dict[str, str]:
+    """Revoca el acceso público de una historia (elimina el share_token)."""
+    client = get_admin_client()
+
+    client.table("stories").update(
+        {"share_token": None}
+    ).eq("id", story_id).eq("org_id", current_user.org_id).execute()
+
+    logger.info("story_unshared", story_id=story_id, org_id=current_user.org_id)
+
+    return {"message": "Acceso público revocado"}

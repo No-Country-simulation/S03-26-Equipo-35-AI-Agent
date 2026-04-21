@@ -3,6 +3,9 @@
 Mockea todos los LLMs (Gemini, Groq, OpenRouter) y Supabase.
 Verifica el flujo happy path, el ciclo de reintento de QA
 y el comportamiento cuando se agotan los reintentos.
+
+V2: Los tests ahora cubren el grafo expandido con 7 nodos:
+    retrieve_rag → analyze_context → write_content → hook_agent → seo_agent → qa_editor → finalize
 """
 
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -67,6 +70,22 @@ MOCK_GEMINI_RESPONSE = LLMResponse(
     latency_ms=800.0,
 )
 
+MOCK_HOOK_RESPONSE = LLMResponse(
+    content="HOOK_SCORE: 8\nVEREDICTO: FUERTE\nANÁLISIS: El gancho usa especificidad y emoción.\nSUGERENCIA: Ninguna.",
+    provider="groq",
+    model="llama-3.3-70b-versatile",
+    tokens_used=40,
+    latency_ms=300.0,
+)
+
+MOCK_SEO_RESPONSE = LLMResponse(
+    content="SEO_SCORE: 7\nPLATAFORMA: blog\nFORTALEZAS: Buena estructura H2.\nMEJORAS: Añadir meta description.\nHASHTAGS_SUGERIDOS: N/A",
+    provider="groq",
+    model="llama-3.3-70b-versatile",
+    tokens_used=45,
+    latency_ms=350.0,
+)
+
 BASE_INPUT = {
     "task": "Escribe un blog post sobre el impacto de las narrativas en la educación",
     "org_id": "test-org-123",
@@ -84,7 +103,7 @@ BASE_INPUT = {
 
 @pytest.mark.asyncio
 async def test_graph_happy_path_blog():
-    """Flujo completo: RAG → Analista → Escritor → QA aprueba → Finaliza."""
+    """Flujo completo: RAG → Analista → Escritor → Hook → SEO → QA aprueba → Finaliza."""
     mock_rag_result = MagicMock()
     mock_rag_result.chunks = [
         MagicMock(text=c["text"], index=c["index"], metadata=c["metadata"])
@@ -99,14 +118,19 @@ async def test_graph_happy_path_blog():
         latency_ms=500.0,
     )
 
-    with patch("core.agents.nodes.retrieve_context", new_callable=AsyncMock) as mock_rag, \
+    with patch("core.rag.retriever.retrieve_context", new_callable=AsyncMock) as mock_rag, \
          patch("core.llm.providers.gemini_provider.generate", new_callable=AsyncMock) as mock_gemini, \
          patch("core.llm.providers.groq_provider.generate", new_callable=AsyncMock) as mock_groq:
 
         mock_rag.return_value = mock_rag_result
         mock_gemini.return_value = MOCK_GEMINI_RESPONSE
-        # Groq se llama 2 veces: Escritor + QA
-        mock_groq.side_effect = [MOCK_GROQ_RESPONSE, qa_approval_response]
+        # V2: Groq se llama 4 veces: Escritor + Hook + SEO + QA
+        mock_groq.side_effect = [
+            MOCK_GROQ_RESPONSE,       # Escritor
+            MOCK_HOOK_RESPONSE,        # Hook Agent
+            MOCK_SEO_RESPONSE,         # SEO Agent
+            qa_approval_response,      # QA Editor
+        ]
 
         result = await run_generation_graph(BASE_INPUT)
 
@@ -142,18 +166,22 @@ async def test_graph_qa_retry_then_approve():
         latency_ms=400.0,
     )
 
-    with patch("core.agents.nodes.retrieve_context", new_callable=AsyncMock) as mock_rag, \
+    with patch("core.rag.retriever.retrieve_context", new_callable=AsyncMock) as mock_rag, \
          patch("core.llm.providers.gemini_provider.generate", new_callable=AsyncMock) as mock_gemini, \
          patch("core.llm.providers.groq_provider.generate", new_callable=AsyncMock) as mock_groq:
 
         mock_rag.return_value = mock_rag_result
         mock_gemini.return_value = MOCK_GEMINI_RESPONSE
-        # Secuencia: Escritor1 → QA_rechaza → Escritor2 → QA_aprueba
+        # V2 Secuencia: Escritor1 → Hook → SEO → QA_rechaza → Escritor2 → Hook → SEO → QA_aprueba
         mock_groq.side_effect = [
-            MOCK_GROQ_RESPONSE,   # Escritor intento 1
-            qa_reject_response,   # QA rechaza
-            MOCK_GROQ_RESPONSE,   # Escritor intento 2 (reintento)
-            qa_approve_response,  # QA aprueba
+            MOCK_GROQ_RESPONSE,       # Escritor intento 1
+            MOCK_HOOK_RESPONSE,        # Hook Agent
+            MOCK_SEO_RESPONSE,         # SEO Agent
+            qa_reject_response,        # QA rechaza
+            MOCK_GROQ_RESPONSE,        # Escritor intento 2 (reintento)
+            MOCK_HOOK_RESPONSE,        # Hook Agent (reintento)
+            MOCK_SEO_RESPONSE,         # SEO Agent (reintento)
+            qa_approve_response,       # QA aprueba
         ]
 
         result = await run_generation_graph(BASE_INPUT)
@@ -182,18 +210,17 @@ async def test_graph_max_retries_exceeded():
         latency_ms=600.0,
     )
 
-    with patch("core.agents.nodes.retrieve_context", new_callable=AsyncMock) as mock_rag, \
+    with patch("core.rag.retriever.retrieve_context", new_callable=AsyncMock) as mock_rag, \
          patch("core.llm.providers.gemini_provider.generate", new_callable=AsyncMock) as mock_gemini, \
          patch("core.llm.providers.groq_provider.generate", new_callable=AsyncMock) as mock_groq:
 
         mock_rag.return_value = mock_rag_result
         mock_gemini.return_value = MOCK_GEMINI_RESPONSE
-        # Escritor → QA rechaza → Escritor → QA rechaza (max alcanzado)
+        # V2: Escritor → Hook → SEO → QA rechaza (x3)
         mock_groq.side_effect = [
-            MOCK_GROQ_RESPONSE,
-            qa_reject,
-            MOCK_GROQ_RESPONSE,
-            qa_reject,
+            MOCK_GROQ_RESPONSE, MOCK_HOOK_RESPONSE, MOCK_SEO_RESPONSE, qa_reject, # Intento 1 (retry 0)
+            MOCK_GROQ_RESPONSE, MOCK_HOOK_RESPONSE, MOCK_SEO_RESPONSE, qa_reject, # Intento 2 (retry 1)
+            MOCK_GROQ_RESPONSE, MOCK_HOOK_RESPONSE, MOCK_SEO_RESPONSE, qa_reject, # Intento 3 (retry 2 -> Agota retries)
         ]
 
         result = await run_generation_graph(BASE_INPUT)
@@ -208,14 +235,17 @@ async def test_graph_max_retries_exceeded():
 @pytest.mark.asyncio
 async def test_graph_rag_failure_continues():
     """Si RAG falla, el grafo continúa con chunks vacíos."""
-    with patch("core.agents.nodes.retrieve_context", new_callable=AsyncMock) as mock_rag, \
+    with patch("core.rag.retriever.retrieve_context", new_callable=AsyncMock) as mock_rag, \
          patch("core.llm.providers.gemini_provider.generate", new_callable=AsyncMock) as mock_gemini, \
          patch("core.llm.providers.groq_provider.generate", new_callable=AsyncMock) as mock_groq:
 
         mock_rag.side_effect = Exception("Supabase connection error")
         mock_gemini.return_value = MOCK_GEMINI_RESPONSE
+        # V2: Escritor + Hook + SEO + QA
         mock_groq.side_effect = [
             MOCK_GROQ_RESPONSE,
+            MOCK_HOOK_RESPONSE,
+            MOCK_SEO_RESPONSE,
             LLMResponse(content="APROBADO", provider="groq", model="test", tokens_used=10, latency_ms=100.0),
         ]
 

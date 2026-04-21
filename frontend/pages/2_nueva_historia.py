@@ -2,13 +2,15 @@
 import streamlit as st
 from api_client import fetch_api
 from components.loading_states import simulate_loading_animation
-from components.styles import inject_global_styles, render_page_header
-
-st.set_page_config(page_title="Nueva Historia", page_icon="✍️", layout="wide")
-inject_global_styles()
+from components.styles import render_page_header
 
 if "token" not in st.session_state:
-    st.switch_page("app.py")
+    st.warning("Debes iniciar sesión para acceder a esta página.")
+    st.markdown(
+        '<meta http-equiv="refresh" content="0; url=./" />',
+        unsafe_allow_html=True,
+    )
+    st.stop()
 
 render_page_header(
     "Nueva <em>Historia</em>",
@@ -309,7 +311,7 @@ if submit:
 
             else:
                 # ── Generación Simple ──
-                with st.spinner("Llamando a la IA Multimodal..."):
+                with st.spinner("Enviando a la IA Multimodal..."):
                     response = fetch_api(
                         "/stories/generate",
                         method="POST",
@@ -325,29 +327,111 @@ if submit:
                         files=file_payload if file_payload else None,
                     )
 
-                st.success("¡Contenido generado exitosamente!")
+                # ── Modo Async: si recibimos job_id, hacer polling ──
+                if response.get("job_id"):
+                    import time as _time
 
-                provider = response.get("provider", "")
-                ms = response.get("latency_ms", 0)
+                    job_id = response["job_id"]
+                    progress_placeholder = st.empty()
+                    progress_placeholder.info("⏳ Generación en background — esperando progreso...")
 
-                st.markdown(f"""
-                <div class="as-result-box">
-                    <div class="as-result-title">{response.get('title', 'Historia generada')}</div>
-                    <div class="as-result-meta">
-                        Generado con <strong>{provider.upper()}</strong> en {ms:.0f}ms
-                        · ID: <code>{response.get('story_id', '')}</code>
+                    max_polls = 120  # 120 * 3s = 6 minutos máximo
+                    for _poll in range(max_polls):
+                        _time.sleep(3)
+                        try:
+                            job_status = fetch_api(f"/stories/jobs/{job_id}", method="GET")
+                        except Exception:
+                            continue
+
+                        status_val = job_status.get("status", "")
+                        progress_msg = job_status.get("progress", "Procesando...")
+
+                        if status_val == "completed":
+                            progress_placeholder.empty()
+                            result_data = job_status.get("result", {})
+                            response = result_data  # Usar el resultado del job
+                            st.success("¡Contenido generado exitosamente!")
+                            break
+                        elif status_val == "failed":
+                            progress_placeholder.empty()
+                            error_msg = job_status.get("result", {}).get("error", "Error desconocido")
+                            st.error(f"Error en la generación: {error_msg}")
+                            response = None
+                            break
+                        else:
+                            progress_placeholder.info(f"⏳ {progress_msg}")
+                    else:
+                        progress_placeholder.empty()
+                        st.warning("La generación está tomando más tiempo del esperado. Revisá 'Mis Historias' en unos minutos.")
+                        response = None
+
+                else:
+                    # ── Modo Sync (sin Redis) ──
+                    st.success("¡Contenido generado exitosamente!")
+
+                if response:
+                    provider = response.get("provider", "")
+                    ms = response.get("latency_ms", 0)
+
+                    st.markdown(f"""
+                    <div class="as-result-box">
+                        <div class="as-result-title">{response.get('title', 'Historia generada')}</div>
+                        <div class="as-result-meta">
+                            Generado con <strong>{provider.upper()}</strong> en {ms:.0f}ms
+                            · ID: <code>{response.get('story_id', '')}</code>
+                        </div>
                     </div>
-                </div>
-                """, unsafe_allow_html=True)
+                    """, unsafe_allow_html=True)
 
-                st.code(response.get("content", ""), language="markdown")
+                    st.code(response.get("content", ""), language="markdown")
 
-                st.download_button(
-                    "⬇️ Descargar contenido",
-                    data=response.get("content", ""),
-                    file_name=f"{story_type}_{task[:20].replace(' ', '_')}.md",
-                    mime="text/markdown",
-                )
+                # Botones de exportación
+                exp_col1, exp_col2, exp_col3 = st.columns(3)
+                with exp_col1:
+                    st.download_button(
+                        "⬇️ Markdown",
+                        data=response.get("content", ""),
+                        file_name=f"{story_type}_{task[:20].replace(' ', '_')}.md",
+                        mime="text/markdown",
+                        key="dl_md_single",
+                    )
+                with exp_col2:
+                    story_id = response.get("story_id", "")
+                    if story_id and st.button("📄 Descargar PDF", key="dl_pdf_gen"):
+                        try:
+                            import os
+
+                            import httpx
+                            token = st.session_state.get("token", "")
+                            api_url = os.getenv("API_BASE_URL", "http://localhost:8000")
+                            with httpx.Client(timeout=30.0) as http_client:
+                                resp = http_client.get(
+                                    f"{api_url}/stories/{story_id}/export/pdf",
+                                    headers={"Authorization": f"Bearer {token}"},
+                                )
+                                if resp.status_code == 200:
+                                    st.download_button(
+                                        "⬇️ Guardar PDF",
+                                        data=resp.content,
+                                        file_name=f"historia_{story_id[:8]}.pdf",
+                                        mime="application/pdf",
+                                        key="dl_pdf_gen_save",
+                                    )
+                                else:
+                                    st.error("Error al generar PDF")
+                        except Exception as pdf_err:
+                            st.error(f"Error: {pdf_err}")
+                with exp_col3:
+                    if story_id and st.button("🔗 Publicar Link", key="share_gen"):
+                        try:
+                            share_result = fetch_api(
+                                f"/stories/{story_id}/share",
+                                method="POST",
+                            )
+                            st.success("¡Historia publicada!")
+                            st.code(share_result.get("share_url", ""), language=None)
+                        except Exception as share_err:
+                            st.error(f"Error: {share_err}")
 
             st.balloons()
 

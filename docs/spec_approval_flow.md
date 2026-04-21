@@ -1,18 +1,20 @@
-# Spec: Flujo de Aprobación
+# Spec: Flujo de Aprobación Documental
 
-> Fuente de verdad para la máquina de estados de aprobación.
+> Fuente de verdad para la máquina de estados de aprobación corporativa.
 
-## Estados
+## Matriz de Estados Central
+
+El universo de las historias es estricto en sus transiciones. Implementado de forma pura en `core/approvals/state_machine.py`.
 
 ```
 BORRADOR → EN_REVISION → APROBADO → PUBLICADO
-               ↓
-           RECHAZADO → BORRADOR
+               ↓                ↓ (Feedback UI)
+           RECHAZADO ←—←—←—←—←—←
 ```
 
-## Roles y permisos
+## Roles y Permisos Enforcement 
 
-| Transición | editor | revisor | admin |
+| Transición | Editor UI | Revisor AI/UI | Root (Admin) |
 |---|---|---|---|
 | borrador → en_revision | ✅ | ❌ | ✅ |
 | en_revision → aprobado | ❌ | ✅ | ✅ |
@@ -20,18 +22,11 @@ BORRADOR → EN_REVISION → APROBADO → PUBLICADO
 | aprobado → publicado | ❌ | ❌ | ✅ |
 | rechazado → borrador | ✅ | ❌ | ✅ |
 
-## Reglas
+## Reglas Universales del SDK Interno
 
-- **Publicado** es estado terminal — no hay vuelta atrás
-- Ningún rol puede saltar estados
-- Cada transición se registra en `approval_history`
-- El historial es inmutable
+- **Publicado** es estado terminal y la mutación está vetada en la base de datos si ya se exportó.
+- Cada cambio graba un snapshot inviolable en `approval_history`.
+- El frontend soporta versionado de texto (`frontend/pages/3_mis_historias.py`) donde el Historial es totalmente restaurable.
 
-## Implementación
-
-`core/approvals/state_machine.py` — **completamente implementado**
-
-## TODO
-
-- [ ] Agregar notificaciones por email al cambiar de estado
-- [ ] Agregar campo de comentario obligatorio al rechazar
+## Estado (V2 MVP)
+✅ Completo a nivel código, endpoints y base de datos con verificación multi-tenant exhaustiva. Funciones extendidas como "Push to social media directo" contempladas en Fase 3.

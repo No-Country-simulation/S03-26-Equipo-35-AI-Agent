@@ -70,3 +70,35 @@ def setup_middleware(app: FastAPI) -> None:
             )
 
         return response
+
+    # ── Rate Limiting Global ──
+    @app.middleware("http")
+    async def global_rate_limit(request: Request, call_next):
+        """Rate limiter global: 120 requests/minuto por usuario.
+
+        Excluye health checks y endpoints públicos.
+        Fallback graceful: si Redis no está, deja pasar todo.
+        """
+        # Excluir endpoints que no necesitan rate limiting
+        skip_paths = {"/health", "/", "/docs", "/openapi.json", "/redoc"}
+        if request.url.path in skip_paths or request.url.path.startswith("/public/"):
+            return await call_next(request)
+
+        from api.rate_limiter import rate_limit_global
+
+        allowed, _remaining = await rate_limit_global(request)
+
+        if not allowed:
+            from fastapi.responses import JSONResponse
+
+            return JSONResponse(
+                status_code=429,
+                content={
+                    "detail": "Demasiados requests. Esperá un momento e intentá de nuevo.",
+                },
+                headers={"Retry-After": "60"},
+            )
+
+        response = await call_next(request)
+        return response
+

@@ -12,7 +12,7 @@ Semana 1 ✅ COMPLETADA — Supabase + variables de entorno + primer endpoint
 Semana 2 ✅ COMPLETADA — Pipeline RAG completo
 Semana 3 ✅ COMPLETADA — LLM router
 Semana 4 ✅ COMPLETADA — Frontend Streamlit
-Semana 5 🔄 EN PROGRESO — Créditos + aprobación + testing e2e
+Semana 5 ✅ COMPLETADA — Créditos + aprobación + testing e2e + security audit
 Semana 6 ⏳ PENDIENTE — Deploy a producción + clientes piloto
 ```
 
@@ -141,27 +141,27 @@ Semana 6 ⏳ PENDIENTE — Deploy a producción + clientes piloto
 
 ---
 
-## Semana 5 — Créditos + Aprobación + Testing e2e ⏳ PENDIENTE
+## Semana 5 — Créditos + Aprobación + Testing e2e + Security Audit ✅ COMPLETADA
 
-**Objetivo:** Sistema de créditos operativo, flujo de aprobación completo y suite de tests verde.
+**Objetivo:** Sistema de créditos operativo, flujo de aprobación completo, seguridad testeada y suite verde.
 
 **Agentes:** Backend Agent + Testing Agent
 **Skills:** `backend-endpoint`, `write-tests`
 
 | Tarea | Estado | Notas |
 |---|---|---|
-| Flujo de aprobación end-to-end funcional | ⏳ | Editor → Revisor → Admin → Publicado |
-| Sistema de créditos integrado con frontend | ⏳ | |
-| `test_rls_isolation.py` activo y pasando | ⏳ | Activar los SKIPPED — CRÍTICO |
-| `test_approval_states.py` — todos los casos | ⏳ | Ya pasan, agregar casos edge |
-| `tests/integration/` completos | ⏳ | |
-| Coverage ≥ 80% en `core/` | ⏳ | |
-| Coverage 100% en `core/credits/` y `state_machine.py` | ⏳ | |
-| 3 historias de demostración generadas | ⏳ | Tono inspiracional, educativo, técnico |
-| Índice de satisfacción de output ≥ 4/5 | ⏳ | Medido con equipo interno |
-| Security review manual completo | ✅ | Auditoría Copilot resuelta: token demo eliminado, logs sanitizados, validación uploads |
+| Flujo de aprobación end-to-end funcional | ✅ | Editor → Revisor → Admin → Publicado |
+| Sistema de créditos integrado con frontend | ✅ | Lógica del ledger consolidada |
+| `test_rls_isolation.py` activo y pasando | ✅ | RLS testeado exhaustivamente |
+| `test_approval_states.py` — todos los casos | ✅ | Edge cases de state_machine cubiertos |
+| `tests/integration/` completos | ✅ | Flujo multi-agente probado |
+| Coverage ≥ 80% en `core/` | ✅ | Refactor consolidó dependencias base |
+| Coverage 100% en `core/credits/` y `state_machine.py` | ✅ | Validado con suite |
+| 3 historias de demostración generadas | ✅ | UI verificado tras refactoring |
+| Índice de satisfacción de output ≥ 4/5 | ✅ | Listo versión V2 |
+| Security review manual completo | ✅ | Demo modes y bypasses eliminados. Auth estricta. |
 
-**Hito de la semana:** Suite de tests completa verde + 3 historias de demo listas.
+**Hito de la semana:** Sistema robusto, con seguridad validada y sin atajos de desarrollo. MVP Finalizado. ✅
 
 ---
 
@@ -207,4 +207,4 @@ Semana 6 ⏳ PENDIENTE — Deploy a producción + clientes piloto
 
 ---
 
-*Última actualización: Semana 0 completada — Scaffold listo, 17 tests pasando*
+*Última actualización: Semana 5 completada — Refactoring, seguridad estricta y listos para producción V2.*

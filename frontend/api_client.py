@@ -80,12 +80,25 @@ def fetch_api(
                     response = client.post(url, headers=headers, data=data, files=files, params=params)
                 else:
                     response = client.post(url, headers=headers, json=json, params=params)
+            elif method == "PATCH":
+                response = client.patch(url, headers=headers, json=json, params=params)
             elif method == "DELETE":
                 response = client.delete(url, headers=headers, params=params)
             else:
                 raise ValueError(f"Método HTTP no soportado: {method}")
 
             if response.status_code >= 400:
+                # Si es error 401 (no autorizado), limpiar sesión y redirigir
+                if response.status_code == 401:
+                    st.session_state.pop("token", None)
+                    st.session_state.pop("user", None)
+                    st.error("Sesión expirada. Redirigiendo al inicio...")
+                    # Redirigir al inicio usando JavaScript
+                    st.markdown(
+                        '<meta http-equiv="refresh" content="1; url=./" />',
+                        unsafe_allow_html=True,
+                    )
+                    st.stop()
                 try:
                     err_msg = response.json().get("detail", str(response.text))
                 except Exception:

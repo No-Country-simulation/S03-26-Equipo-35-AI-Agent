@@ -30,7 +30,10 @@ class ContentGenerationState(TypedDict):
     rag_chunks: list[dict[str, Any]]   # Chunks RAG crudos del retriever
     brand_insights: str                # Brief destilado por el Analista
     visual_context: str                # Análisis de assets por Gemini Flash
+    few_shot_examples: list[str]       # Ejemplos dorados inyectados (Fase 1 — Few-Shot)
     draft_content: str                 # Borrador del Agente Escritor
+    hook_feedback: str                 # Feedback del Agente de Enganche (Fase 3)
+    seo_feedback: str                  # Feedback del Agente SEO (Fase 3)
     qa_feedback: str                   # Correcciones del Editor QA (vacío si aprobó)
     qa_approved: bool                  # True cuando el QA da el visto bueno
     retry_count: int                   # Número de reintentos del ciclo Escritor→QA

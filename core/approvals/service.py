@@ -51,6 +51,7 @@ async def execute_transition(
         from_status=current_status,
         to_status=new_status,
         changed_by=user_id,
+        role=role,
         comment=comment
     )
 
