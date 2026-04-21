@@ -20,7 +20,7 @@ render_page_header(
 st.info("""
 **Flujo de aprobación:** Borrador → En Revisión → Aprobado → Publicado
 - **Editor**: Puede enviar borradores a revisión
-- **Revisor**: Puede aprobar o rechazar historias en revisión  
+- **Revisor**: Puede aprobar o rechazar historias en revisión
 - **Admin**: Puede publicar historias aprobadas
 """)
 
@@ -114,8 +114,7 @@ try:
                                     st.rerun()
                                 except Exception as e:
                                     st.error(f"Error: {e}")
-                        with cols[1]:
-                            with st.expander("⭐ Convertir en Molde", expanded=False):
+                        with cols[1], st.expander("⭐ Convertir en Molde", expanded=False):
                                 st.caption("Guardar esta historia como Post Dorado para futuras generaciones.")
                                 story_type = st.selectbox(
                                     "Tipo de contenido",
@@ -163,19 +162,18 @@ try:
                                 except Exception as e:
                                     st.error(f"Error al guardar molde: {e}")
 
-                    elif status == "rechazado":
+                    elif status == "rechazado" and st.button("🔄 Volver a Borrador (para editar)", key=f"back_{item.get('id')}"):
                         # Rechazado: Volver a borrador para editar (editor/admin)
-                        if st.button("🔄 Volver a Borrador (para editar)", key=f"back_{item.get('id')}"):
-                            try:
-                                fetch_api(
-                                    "/approvals/transition",
-                                    method="POST",
-                                    json={"story_id": item.get("id"), "target_status": "borrador"}
-                                )
-                                st.success("Historia movida a borrador.")
-                                st.rerun()
-                            except Exception as e:
-                                st.error(f"Error: {e}")
+                        try:
+                            fetch_api(
+                                "/approvals/transition",
+                                method="POST",
+                                json={"story_id": item.get("id"), "target_status": "borrador"}
+                            )
+                            st.success("Historia movida a borrador.")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Error: {e}")
 
 except Exception as e:
     st.error(f"Error al cargar: {e}")

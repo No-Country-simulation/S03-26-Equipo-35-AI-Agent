@@ -67,7 +67,7 @@ def _build_image_prompt(title: str, story_type: str, content: str = "") -> str:
     if content:
         # Limpiar markdown y extraer primera línea significativa
         clean_content = re.sub(r'[#*_>]', '', content).strip()
-        lines = [l.strip() for l in clean_content.split('\n') if l.strip()]
+        lines = [line.strip() for line in clean_content.split('\n') if line.strip()]
 
         # Buscar la primera línea que no sea "ROL" ni instrucciones
         for line in lines[:5]:
@@ -117,7 +117,7 @@ def _build_image_prompt(title: str, story_type: str, content: str = "") -> str:
         clean_content = re.sub(r'[#*_>\-\"\']', '', content).strip()
 
         # Buscar líneas cortas que podrían ser hooks (3-6 palabras)
-        lines = [l.strip() for l in clean_content.split('\n') if l.strip()]
+        lines = [line.strip() for line in clean_content.split('\n') if line.strip()]
         for line in lines:
             words = line.split()
             if 3 <= len(words) <= 8:
