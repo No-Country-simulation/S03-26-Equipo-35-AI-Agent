@@ -132,7 +132,7 @@ Semana 6 ⏳ PENDIENTE — Deploy a producción + clientes piloto
 | `5_configuracion.py` — créditos y equipo | ✅ | Render context y billetera mock |
 | Componente `loading_states.py` | ✅ | Mensajes rotativos implementados |
 | Componente `story_card.py` | ✅ | Card estructurada con metadata |
-| Componente `credit_counter.py` | ✅ | |
+| Componente `styles.py`             | ✅ | Estilos CSS y header reutilizable |
 | Componente `approval_badge.py` | ✅ | Renderizado en colores |
 | Story reveal animado al recibir contenido | ✅ | Uso de st.balloons() |
 | Flujo completo sin errores de UI | ✅ | |

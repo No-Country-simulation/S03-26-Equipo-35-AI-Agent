@@ -148,10 +148,10 @@ Ejecutar los scripts SQL en orden desde el **SQL Editor** de Supabase:
 db/migrations/001_create_organizations.sql
 db/migrations/002_create_embeddings.sql
 db/migrations/003_create_stories.sql
-db/migrations/004_create_approval_history.sql
-db/migrations/005_create_credit_system.sql
+db/migrations/004_create_credit_ledger.sql
+db/migrations/005_create_approval_history.sql
 db/migrations/006_create_match_embeddings_rpc.sql
-db/migrations/007_add_stories_extras.sql
+db/migrations/007_create_credit_balance_rpc.sql
 db/migrations/008_story_versions.sql
 db/migrations/009_share_token.sql
 db/migrations/010_create_golden_examples.sql
@@ -211,6 +211,17 @@ autostory-builder/
 │   │   ├── embedder.py       ← Cohere embed-multilingual-v3 (1024 dims)
 │   │   ├── retriever.py      ← RPC híbrida (RRF vectorial+FTS) con fallback
 │   │   └── file_extractor.py ← PDF, DOCX, TXT
+│   ├── export/               ← Exportadores de contenido
+│   │   ├── image_generator.py← Portadas IA vía HuggingFace FLUX.1 + fallback Pillow
+│   │   ├── pdf_generator.py  ← Exportación a PDF con tipografía profesional
+│   │   └── html_renderer.py  ← Renderizado HTML para publicación web
+│   ├── cache/                ← Caching de alta velocidad
+│   │   └── redis_client.py   ← Cliente Upstash Redis (jobs, sesiones)
+│   ├── stories/              ← Lógica de negocio de historias
+│   │   ├── service.py        ← Servicio principal de historias
+│   │   └── helpers.py        ← Utilidades de procesamiento
+│   ├── tasks/                ← Workers de background
+│   │   └── generation_worker.py ← Worker asíncrono de generación
 │   ├── multimedia/           ← Extractores multimedia
 │   │   ├── youtube.py        ← Transcripciones de YouTube
 │   │   ├── context_scraper.py← Scraping efímero de referencia
@@ -238,10 +249,15 @@ autostory-builder/
 │   │   ├── 4_centro_de_aprobaciones.py  ← Circuito de aprobación por roles
 │   │   └── 5_identidad_y_configuración.py ← Perfil + gestión de Posts Dorados
 │   └── components/           ← Componentes reutilizables
+│       ├── approval_badge.py ← Badge de estado con colores
+│       ├── loading_states.py ← Mensajes rotativos de carga
+│       ├── story_card.py     ← Card estructurada con metadata
+│       └── styles.py         ← Estilos CSS y header reutilizable
 │
 ├── tests/                    ← Suite de tests (pytest)
 │   ├── unit/                 ← Tests unitarios (state machine, chunker, etc.)
-│   └── integration/          ← Tests de integración (graph, auth, RAG)
+│   ├── integration/          ← Tests de integración (graph, auth, RAG)
+│   └── e2e/                  ← Tests end-to-end
 │
 └── docs/                     ← Specs funcionales y roadmap
     ├── roadmap_semanal.md
@@ -274,11 +290,9 @@ BORRADOR → EN_REVISION → APROBADO → PUBLICADO
 
 | Rol | Permisos |
 |---|---|
-| **Editor** | Crea borradores, envía a revisión |
-| **Revisor** | Aprueba o rechaza contenido |
-| **Admin** | Publica contenido, acceso completo |
-
-> **Nota MVP:** Para facilitar testing local, el rol `editor` temporalmente tiene permisos ampliados: puede aprobar, rechazar y publicar contenido. En producción, estos permisos se restringirían al flujo original.
+| **Editor** | Crea borradores, envía a revisión, revierte rechazos a borrador |
+| **Revisor** | Aprueba o rechaza contenido en revisión |
+| **Admin** | Publica contenido aprobado, acceso completo a todas las transiciones |
 
 ---
 
